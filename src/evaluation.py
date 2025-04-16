@@ -44,11 +44,18 @@ def evaluate_agent(
     if single_seed:
         seeds = [seeds]
     
-    # Create environment
+    # Create environment using scenario parameters
+    env_params = scenario.get('env_params', {}).copy()  # Make a copy to avoid modifying the original
+    
+    # Set render_mode only if not already provided in env_params
+    if 'render_mode' not in env_params and render:
+        env_params['render_mode'] = "rgb_array"
+    
+    # Create the environment with all parameters
     env = SailingEnv(
         wind_init_params=scenario['wind_init_params'],
         wind_evol_params=scenario['wind_evol_params'],
-        render_mode="rgb_array" if render else None
+        **env_params
     )
     
     # Initialize results
@@ -59,6 +66,7 @@ def evaluate_agent(
     frames = [] if render and single_seed else None
     positions = [] if single_seed else None
     actions = [] if single_seed else None
+    individual_results = []  # Store detailed results for each episode
     
     # Evaluate on each seed
     iterator = seeds if not verbose else tqdm(seeds, desc="Evaluating seeds")
@@ -74,6 +82,8 @@ def evaluate_agent(
         total_discounted_reward = 0  # Initialize discounted reward
         steps = 0
         episode_actions = []
+        episode_success = False  # Default to failure
+        positions_history = [] if single_seed else None
         
         # Run episode
         while steps < max_horizon:
@@ -100,19 +110,32 @@ def evaluate_agent(
             
             # Store position if single seed
             if single_seed:
-                positions.append(info['position'].copy())
+                positions_history.append(info['position'].copy())
             
             # Check if episode is done
             if terminated or truncated:
+                # Check if terminated due to success (reaching the goal) or timeout
+                # A successful episode yields a reward of 100 in the current implementation
+                episode_success = reward > 0 or (info.get('distance_to_goal', float('inf')) < 1.5)
                 break
         
         # Store results
         all_rewards.append(total_reward)
-        all_discounted_rewards.append(total_discounted_reward)  # Store discounted rewards
+        all_discounted_rewards.append(total_discounted_reward)
         all_steps.append(steps)
-        all_successes.append(info.get('reached_goal', False))
+        all_successes.append(episode_success)
         if single_seed:
+            positions = positions_history
             actions = episode_actions
+        
+        # Store individual episode results
+        individual_results.append({
+            'seed': seed,
+            'reward': total_reward,
+            'discounted_reward': total_discounted_reward,
+            'steps': steps,
+            'success': episode_success
+        })
     
     # Compute statistics
     results = {
@@ -120,10 +143,11 @@ def evaluate_agent(
         'discounted_rewards': all_discounted_rewards,
         'steps': all_steps,
         'success_rate': np.mean(all_successes),
-        'mean_reward': np.mean(all_discounted_rewards),  # Now using discounted rewards
-        'std_reward': np.std(all_discounted_rewards),    # Now using discounted rewards
+        'mean_reward': np.mean(all_discounted_rewards),
+        'std_reward': np.std(all_discounted_rewards),
         'mean_steps': np.mean(all_steps),
-        'std_steps': np.std(all_steps)
+        'std_steps': np.std(all_steps),
+        'individual_results': individual_results
     }
     
     # Add visualization data for single seed

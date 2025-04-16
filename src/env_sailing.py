@@ -89,11 +89,16 @@ class SailingEnv(gym.Env):
         self.last_action = None
         
         # Define action and observation spaces
-        self.action_space = gym.spaces.Discrete(3)  # 0: turn left, 1: go straight, 2: turn right
+        self.action_space = gym.spaces.Discrete(9)  # 0-7: Move in direction, 8: Stay in place
+        
+        # Calculate the shape for the full wind field (grid_size[0] x grid_size[1] x 2)
+        wind_field_shape = (grid_size[0] * grid_size[1] * 2,)
+        
+        # Define observation space to include the full wind field
         self.observation_space = gym.spaces.Box(
             low=-np.inf, 
             high=np.inf, 
-            shape=(6,),  # [x, y, vx, vy, wx, wy]
+            shape=(6 + wind_field_shape[0],),  # [x, y, vx, vy, wx, wy, flattened wind field]
             dtype=np.float32
         )
         
@@ -577,15 +582,25 @@ class SailingEnv(gym.Env):
         return 0.0
     
     def _get_observation(self):
-        """Create the observation array [x, y, vx, vy, wx, wy]."""
+        """
+        Create the observation array [x, y, vx, vy, wx, wy, flattened wind field].
+        
+        Returns:
+            observation: A numpy array containing the agent's position, velocity,
+                        the wind at the current position, and the full wind field.
+        """
         # Get wind at current position
         current_wind = self._get_wind_at_position(self.position)
+        
+        # Flatten the wind field
+        flattened_wind = self.wind_field.reshape(-1).astype(np.float32)
         
         # Create observation array
         observation = np.concatenate([
             self.position,      # x, y
             self.velocity,      # vx, vy
-            current_wind        # wx, wy
+            current_wind,       # wx, wy
+            flattened_wind      # Full wind field (flattened)
         ]).astype(np.float32)
         
         return observation 

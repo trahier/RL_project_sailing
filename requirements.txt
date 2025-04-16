@@ -1,0 +1,18 @@
+# Required packages for the Sailing Challenge
+
+# Core scientific packages
+numpy>=1.20.0
+matplotlib>=3.5.0
+
+# Reinforcement learning environment
+gymnasium>=0.28.1
+
+# Interactive widgets and progress bars (for notebooks)
+ipywidgets>=7.6.0
+tqdm>=4.62.0
+
+# IPython display components (for notebook visualizations)
+ipython>=7.0.0
+
+# Type hints
+typing-extensions>=4.0.0 
