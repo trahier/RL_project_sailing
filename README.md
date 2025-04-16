@@ -167,6 +167,43 @@ while not (done or truncated):
 print(f"Episode finished with total reward: {total_reward}")
 ```
 
+## Command Line Interface
+
+The project includes command-line tools for agent validation and evaluation:
+
+### Validating an Agent
+
+To validate that your agent implementation meets the interface requirements:
+
+```bash
+cd Sailing_project_v1/src
+python test_agent_validity.py path/to/your_agent.py
+```
+
+Example output for a valid agent:
+```
+Agent validation results for: path/to/your_agent.py
+Agent name: YourAgent
+Valid: True
+Validation successful! The agent meets all requirements.
+```
+
+### Evaluating an Agent
+
+To evaluate your agent's performance on different scenarios:
+
+```bash
+cd Sailing_project_v1/src
+python evaluate_submission.py path/to/your_agent.py --scenario training_1 --seeds 42 43 44
+```
+
+Options:
+- `--scenario`: Scenario to evaluate (default: simple_test)
+- `--seeds`: Seeds to use for evaluation (default: 42)
+- `--max_horizon`: Maximum steps per episode (default: 200)
+- `--output`: Save results to specified JSON file
+- `--verbose`: Show detailed progress
+
 ## Creating New Agents
 
 To create a new agent, implement a class that inherits from `BaseAgent` with the following methods:
