@@ -11,7 +11,7 @@ Usage:
 Options:
     --scenario SCENARIO    Name of scenario to evaluate on (default: all training scenarios)
     --seeds SEEDS          Space-separated list of seeds (default: 10 random seeds)
-    --max_horizon N        Maximum steps per episode (default: 200)
+    --max_horizon N        Maximum steps per episode (default: 1000)
     --render               Enable rendering (only works with a single seed)
     --output FILE          Save results to a JSON file
     --include-test         Include the hidden test scenario (evaluator use only)
@@ -85,8 +85,8 @@ def parse_args():
     parser.add_argument(
         "--max_horizon",
         type=int,
-        default=200,
-        help="Maximum steps per episode (default: 200)"
+        default=1000,
+        help="Maximum steps per episode (default: 1000)"
     )
     
     parser.add_argument(

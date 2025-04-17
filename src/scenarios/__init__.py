@@ -66,9 +66,9 @@ TRAINING_SCENARIO_3 = {
     }
 }
 
-# Simple Test Scenario: Stable NE wind with minimal variations
-# Characteristics: Very stable conditions, minimal noise, infrequent changes
-SIMPLE_TEST_SCENARIO = {
+# Simple Static Scenario: Stable NE wind with NO variations
+# Characteristics: Completely static conditions, minimal noise, no wind changes
+SIMPLE_STATIC_SCENARIO = {
     'wind_init_params': {
         'base_speed': 4.0,
         'base_direction': (-0.7, -0.7),  # NE wind
@@ -78,12 +78,12 @@ SIMPLE_TEST_SCENARIO = {
         'noise': 0.05               # Minimal noise
     },
     'wind_evol_params': {
-        'wind_change_prob': 0.2,    # Infrequent changes
+        'wind_change_prob': 0.0,    # No changes - completely static
         'pattern_scale': 128,
-        'perturbation_angle_amplitude': 0.05,
-        'perturbation_strength_amplitude': 0.05,
-        'wind_evolution_bias': (1.0, 0.0),  # Slight eastward bias
-        'bias_strength': 0.1
+        'perturbation_angle_amplitude': 0.0,  # No angle perturbations
+        'perturbation_strength_amplitude': 0.0,  # No strength perturbations
+        'wind_evolution_bias': (0.0, 0.0),  # No bias
+        'bias_strength': 0.0  # No bias strength
     }
 }
 
@@ -92,7 +92,7 @@ SCENARIOS = {
     'training_1': TRAINING_SCENARIO_1,
     'training_2': TRAINING_SCENARIO_2,
     'training_3': TRAINING_SCENARIO_3,
-    'simple_test': SIMPLE_TEST_SCENARIO
+    'simple_static': SIMPLE_STATIC_SCENARIO
 }
 
 def get_scenario(name):
@@ -100,7 +100,7 @@ def get_scenario(name):
     Get the parameters for a specific scenario.
     
     Args:
-        name: String, one of ['training_1', 'training_2', 'training_3', 'simple_test']
+        name: String, one of ['training_1', 'training_2', 'training_3', 'simple_static']
         
     Returns:
         Dictionary containing wind_init_params and wind_evol_params

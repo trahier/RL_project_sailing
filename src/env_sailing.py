@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Arrow
 from typing import Tuple, Dict, Any, Optional
-from sailing_physics import calculate_sailing_efficiency
+from src.sailing_physics import calculate_sailing_efficiency
+from src.scenarios import SIMPLE_STATIC_SCENARIO
 
 class SailingEnv(gym.Env):
     """
@@ -13,25 +14,9 @@ class SailingEnv(gym.Env):
     
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    # Default wind field initialization parameters
-    DEFAULT_WIND_INIT_PARAMS = {
-        'base_speed': 4.0,
-        'base_direction': (-0.65, -0.75),  # More northern-oriented
-        'pattern_scale': 32,         # Scale of the anticyclonic pattern
-        'pattern_strength': 0.3,     # Wind direction variation
-        'strength_variation': 0.4,   # Wind strength variation
-        'noise': 0.1                 # Stochastic component
-    }
-
-    # Default wind evolution parameters
-    DEFAULT_WIND_EVOL_PARAMS = {
-        'wind_change_prob': 0.1,     # Probability of wind change each step
-        'pattern_scale': 32,         # Scale of evolution pattern (can be different from init)
-        'perturbation_angle_amplitude': 0.1,  # Amplitude of wind direction perturbations
-        'perturbation_strength_amplitude': 0.2,  # Amplitude of wind strength perturbations
-        'wind_evolution_bias': (0.0, 0.0),  # Global direction bias for wind evolution
-        'bias_strength': 0.1         # How strongly to apply the evolution bias
-    }
+    # Default wind parameters - match the simple static scenario
+    DEFAULT_WIND_INIT_PARAMS = SIMPLE_STATIC_SCENARIO['wind_init_params']
+    DEFAULT_WIND_EVOL_PARAMS = SIMPLE_STATIC_SCENARIO['wind_evol_params']
     
     def __init__(self, 
                  grid_size=(32, 32),

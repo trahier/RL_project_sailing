@@ -1,19 +1,20 @@
-# Sailing Environment for Reinforcement Learning
+# SAILING CHALLENGE
 
-This project implements a sailing navigation environment for reinforcement learning. It simulates a boat navigating from a starting point to a goal while accounting for wind dynamics.
+## Challenge Presentation
 
-## The Challenge
+Welcome to the Sailing Challenge! Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
 
-The Sailing Challenge tasks you with implementing an agent that can efficiently navigate a sailboat from a starting point to a goal under varying wind conditions. The agent needs to:
-
-1. Understand and navigate based on sailing physics - where direction relative to wind determines sailing efficiency
-2. Adapt to changing wind patterns that vary across different scenarios
-3. Find efficient paths considering that the shortest path may not be the most effective due to wind constraints
-4. Develop a strategy that generalizes well across multiple wind scenarios
+The challenge provides 3 training scenarios with different wind patterns. Your agent will be evaluated on both these training scenarios and a hidden test scenario to assess its ability to generalize to new conditions.
 
 ![Sailing Environment](sailing_environment.png)
 
-## Installation
+The sailing environment features:
+- A grid-based world where the boat must navigate from the starting point (bottom center) to the goal (top center)
+- Realistic wind fields that vary spatially and temporally
+- Physics-based boat movement influenced by wind direction and strength
+- Success depends on understanding sailing physics and adapting to changing wind conditions
+
+### Installation Requirements
 
 To set up the environment, we recommend using a virtual environment:
 
@@ -31,187 +32,97 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Project Structure
+### Challenge Walkthrough
 
+We recommend exploring the notebooks in the following order:
+
+1. **challenge_walkthrough.ipynb**  
+   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the 3 training scenarios and explains how your agent will be tested on an additional hidden scenario.
+
+2. **wind_evolution_exploration.ipynb** (optional)  
+   A deep dive into wind patterns and their evolution over time. This helps understand how wind changes affect navigation strategies.
+
+3. **design_agent.ipynb**  
+   Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents. Use this to create your submission file.
+   
+4. **validate_agent.ipynb**  
+   Test that your agent implementation meets the required interface. Ensure your agent is valid before submission.
+   
+   Command line equivalent:
+   ```bash
+   cd src
+   python test_agent_validity.py path/to/your_submission.py
+   ```
+
+5. **evaluate_agent.ipynb**  
+   Evaluate your agent's performance across different scenarios and understand the metrics used for grading.
+   
+   Command line equivalent:
+   ```bash
+   cd src
+   # Evaluate on a specific training scenario
+   python evaluate_submission.py path/to/your_submission.py --scenario training_1 --seeds 42 43 44
+   
+   # Evaluate on all training scenarios
+   python evaluate_submission.py path/to/your_submission.py --seeds 1 2 3 4 5
+   ```
+
+## Submission Instructions & Grading
+
+### Submission Format
+
+Your submission should consist of a **single Python file** containing your agent implementation. The file must:
+
+1. Define a class that inherits from `BaseAgent`
+2. Implement all required methods: `act`, `reset`, and `seed`
+3. Be validated using the validation tool provided
+
+**IMPORTANT**: Submissions should follow the naming convention:
 ```
-Sailing_project_v1/
-├── notebooks/         # Jupyter notebooks for testing and demonstrations
-├── src/               # Source code
-│   ├── agents/        # Agent implementations
-│   │   ├── agent_greedy.py   # Simple greedy agent example
-│   │   └── base_agent.py     # Base class for all agents
-│   ├── scenarios/     # Wind scenario definitions
-│   ├── env_sailing.py        # The sailing environment implementation
-│   ├── evaluation.py         # Tools for evaluating agents
-│   └── sailing_physics.py    # Physics calculations for sailing
-├── requirements.txt   # Required Python packages
-└── README.md          # This file
+lastname_firstname_submission01.py
+```
+Use sequential numbering for multiple submissions (e.g., `lastname_firstname_submission02.py`).
+
+### Validation
+
+Before submitting, validate your agent:
+
+```bash
+cd src
+python test_agent_validity.py path/to/your/lastname_firstname_submission01.py
 ```
 
-## Grading
+### Evaluation
+
+Your agent will be evaluated on:
+
+```bash
+cd src
+python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --include-test
+```
+
+### Grading Criteria
 
 Your submission will be evaluated based on:
 
-- **Primary (70%)**: Mean reward achieved on the hidden test scenario with novel wind patterns
-- **Secondary (30%)**: Performance across the training scenarios
-- **Bonus**: Code quality, novel approaches, and efficiency (steps to goal)
+1. **Agent Validity (Pass/Fail)**: Your agent must pass validation checks
+2. **Training Scenario Performance**: Performance across the three training scenarios
+3. **Test Scenario Performance**: Performance on the hidden test scenario
 
-A higher mean reward indicates a more effective sailing strategy. The best agents will achieve high performance on both known (training) and unknown (test) scenarios, demonstrating their ability to generalize.
+The final grade will be calculated based on a weighted combination of these factors. An agent that successfully reaches the goal in all three training scenarios is already on track to achieve a strong grade.
 
-## Getting Started: Notebook Reading Order
+**Note**: A valid agent that can consistently reach the goal in all training scenarios will already have a grade close to the median. Exceptional performance on the test scenario and creative approaches can further improve your grade.
 
-We recommend exploring the notebooks in this order:
+### Challenge Timeline
 
-1. **challenge_walkthrough.ipynb**: An introduction to the sailing challenge, environment mechanics, and how agents interact with the environment
-   
-2. **wind_evolution_exploration.ipynb**: Deep dive into how wind patterns evolve and their impact on navigation
-   
-3. **validate_agent.ipynb**: Learn how to implement a valid agent and confirm it meets the interface requirements
-   
-4. **evaluate_agent.ipynb**: Understand how to evaluate your agent's performance across different scenarios
+- **Duration**: 2 weeks
+- **Submission Limit**: Maximum 4 submissions per week
+- **Leaderboard Updates**: Mondays and Thursdays (showing performance on the test scenario)
 
-## Environment Description
+All submissions will be evaluated on both training and test scenarios, but test scenario results will only be shared during leaderboard updates. This prevents overfitting to the test scenario while still providing feedback on generalization ability.
 
-The sailing environment simulates a grid-based world where an agent (a boat) must navigate from a starting point (bottom center) to a goal (top center) while being affected by wind dynamics.
+## Good Luck!
 
-Key features:
-- Grid-based world (configurable size, default 32x32)
-- Wind dynamics with variable wind directions
-- Physics-based boat movement influenced by wind
-- Reward function based on progress toward the goal
+Start by carefully reading through the notebooks in the recommended order. By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent.
 
-## Sailing Physics
-
-The environment simulates basic sailing physics with a focus on educational value. Here's how it works:
-
-### Wind and Boat Interaction
-
-Sailing relies on harnessing wind energy to propel a boat. The efficiency of this energy transfer depends primarily on the angle between the boat's direction and the wind direction:
-
-- **Upwind (0-45°)**: In the "no-go zone," boats cannot sail directly into the wind. Efficiency is minimal (~5%).
-- **Close-hauled (45-90°)**: Efficiency increases linearly from 50% to 100% as the angle approaches 90°.
-- **Beam reach (90°)**: Maximum efficiency (100%) when wind is perpendicular to boat direction.
-- **Broad reach (90-135°)**: Maintains maximum efficiency.
-- **Running/Downwind (135-180°)**: Efficiency decreases but remains good (minimum 50%).
-
-### Velocity Calculation
-
-The boat's velocity at each timestep is calculated as:
-
-```
-new_velocity = (current_velocity × inertia_factor) + sailing_force
-```
-
-Where:
-- **inertia_factor**: Determines how much of the current velocity is maintained
-- **sailing_force**: Calculated as `direction × efficiency × wind_strength × boat_efficiency`
-
-## Agents
-
-The project includes a simple example agent:
-
-**Greedy Agent**: A basic agent in `agent_greedy.py` that always tries to move north (toward the goal). Simple but can be ineffective when sailing against the wind. This serves as a starting point for developing your own agent.
-
-## Developing Better Agents
-
-To develop an agent that outperforms the greedy baseline:
-
-1. **Start with a wind-aware agent**: Implement a simple agent that considers the current wind direction and chooses actions based on sailing efficiency.
-
-2. **Add path planning**: Implement algorithms like A* that account for both distance to goal and sailing efficiency.
-
-3. **Consider future wind states**: If your agent can predict or account for wind changes, it can make more informed decisions.
-
-4. **Apply reinforcement learning**: For more advanced solutions, consider:
-   - Q-learning or SARSA for discrete state-action spaces
-   - Deep Q-Networks for handling the continuous wind field
-   - Policy gradient methods to directly learn optimal sailing policies
-
-5. **Test thoroughly**: Evaluate your agent across all training scenarios to ensure it generalizes well.
-
-## Example Usage
-
-```python
-import numpy as np
-from src.env_sailing import SailingEnv
-from src.agents.agent_greedy import GreedyAgent
-
-# Create the environment
-env = SailingEnv(grid_size=32, render_mode="rgb_array")
-
-# Create the agent
-agent = GreedyAgent()
-
-# Reset the environment and agent
-observation, info = env.reset()
-agent.reset()
-
-# Run an episode
-done = False
-truncated = False
-total_reward = 0
-
-while not (done or truncated):
-    # Choose an action
-    action = agent.act(observation)
-    
-    # Take a step in the environment
-    observation, reward, done, truncated, info = env.step(action)
-    
-    # Update total reward
-    total_reward += reward
-    
-    # Render the environment
-    env.render()
-
-print(f"Episode finished with total reward: {total_reward}")
-```
-
-## Command Line Interface
-
-The project includes command-line tools for agent validation and evaluation:
-
-### Validating an Agent
-
-To validate that your agent implementation meets the interface requirements:
-
-```bash
-cd Sailing_project_v1/src
-python test_agent_validity.py path/to/your_agent.py
-```
-
-Example output for a valid agent:
-```
-Agent validation results for: path/to/your_agent.py
-Agent name: YourAgent
-Valid: True
-Validation successful! The agent meets all requirements.
-```
-
-### Evaluating an Agent
-
-To evaluate your agent's performance on different scenarios:
-
-```bash
-cd Sailing_project_v1/src
-python evaluate_submission.py path/to/your_agent.py --scenario training_1 --seeds 42 43 44
-```
-
-Options:
-- `--scenario`: Scenario to evaluate (default: simple_test)
-- `--seeds`: Seeds to use for evaluation (default: 42)
-- `--max_horizon`: Maximum steps per episode (default: 200)
-- `--output`: Save results to specified JSON file
-- `--verbose`: Show detailed progress
-
-## Creating New Agents
-
-To create a new agent, implement a class that inherits from `BaseAgent` with the following methods:
-- `__init__()`: Initialize the agent
-- `reset()`: Reset the agent's state
-- `act(observation)`: Choose an action based on the observation
-- `seed(seed)`: Set the random seed for reproducibility
-
-## License
-
-This project is provided for educational purposes.
+Remember that sailing efficiently requires adapting to wind conditions - the shortest path is rarely the optimal one in sailing!
