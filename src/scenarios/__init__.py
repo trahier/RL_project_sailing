@@ -3,67 +3,58 @@ Predefined scenarios for the sailing challenge.
 Each scenario presents different wind patterns and evolution characteristics.
 """
 
-# Training Scenario 1: Clockwise Rotating Wind
-# Characteristics: Predictable clockwise rotation with moderate speed variations
+# Common wind evolution parameters
+# Using the same wind evolution parameters for all scenarios for pedagogical purposes
+# Wind will make a complete 180° rotation in ~100 steps on average with these parameters
+COMMON_WIND_EVOL_PARAMS = {
+    'wind_change_prob': 1.0,      # Wind field updates on every step
+    'pattern_scale': 64,         # Scale of spatial perturbation patterns
+    'perturbation_angle_amplitude': 0.12,  # Angle perturbation per step
+    'perturbation_strength_amplitude': 0.15,  # Strength variation per step
+    'rotation_bias': 0.02,        # Clockwise rotational bias (positive = clockwise)
+    'bias_strength': 1.0          # Full strength of rotational bias
+}
+
+# Training Scenario 1: North-Northwest Wind
+# Characteristics: Starting with NNW wind
 TRAINING_SCENARIO_1 = {
     'wind_init_params': {
         'base_speed': 4.0,
-        'base_direction': (-0.65, -0.75),  # NNW wind
-        'pattern_scale': 32,
-        'pattern_strength': 0.3,
-        'strength_variation': 0.5,
-        'noise': 0.1
-    },
-    'wind_evol_params': {
-        'wind_change_prob': 1,
-        'pattern_scale': 128,
-        'perturbation_angle_amplitude': 0.2,
-        'perturbation_strength_amplitude': 0.2,
-        'wind_evolution_bias': (1, 0.0),  # Eastward bias
-        'bias_strength': 0.2
-    }
-}
-
-# Training Scenario 2: Counter-Clockwise Rotation
-# Characteristics: Counter-clockwise rotation with stronger variations
-TRAINING_SCENARIO_2 = {
-    'wind_init_params': {
-        'base_speed': 4.0,
-        'base_direction': (0.65, -0.75),  # NNE wind
-        'pattern_scale': 32,
-        'pattern_strength': 0.4,
-        'strength_variation': 0.5,
-        'noise': 0.1
-    },
-    'wind_evol_params': {
-        'wind_change_prob': 1,
-        'pattern_scale': 128,
-        'perturbation_angle_amplitude': 0.2,
-        'perturbation_strength_amplitude': 0.2,
-        'wind_evolution_bias': (-1, 0.0),  # Westward bias
-        'bias_strength': 0.2
-    }
-}
-
-# Training Scenario 3: Oscillating Wind
-# Characteristics: North-South oscillation with varying speeds
-TRAINING_SCENARIO_3 = {
-    'wind_init_params': {
-        'base_speed': 4.0,
-        'base_direction': (0.0, -1.0),  # Pure North wind
+        'base_direction': (-0.7, -0.7),  # NNW wind
         'pattern_scale': 32,
         'pattern_strength': 0.3,
         'strength_variation': 0.4,
         'noise': 0.1
     },
-    'wind_evol_params': {
-        'wind_change_prob': 0.8,  # Slightly less frequent updates
-        'pattern_scale': 96,      # Smaller scale than rotating scenarios
-        'perturbation_angle_amplitude': 0.15,
-        'perturbation_strength_amplitude': 0.3,  # More speed variation
-        'wind_evolution_bias': (0.0, 0.0),  # No directional bias
-        'bias_strength': 0.0      # Pure oscillation
-    }
+    'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
+}
+
+# Training Scenario 2: North-Northeast Wind
+# Characteristics: Starting with NNE wind
+TRAINING_SCENARIO_2 = {
+    'wind_init_params': {
+        'base_speed': 4.0,
+        'base_direction': (0, -1), 
+        'pattern_scale': 128,
+        'pattern_strength': 0.7,
+        'strength_variation': 0.2,
+        'noise': 0.1
+    },
+    'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
+}
+
+# Training Scenario 3: Pure North Wind
+# Characteristics: Starting with N wind, smaller pattern scale
+TRAINING_SCENARIO_3 = {
+    'wind_init_params': {
+        'base_speed': 4.0,
+        'base_direction': (0.9, 0.2),  
+        'pattern_scale': 16,           
+        'pattern_strength': 0.1,
+        'strength_variation': 0.4,
+        'noise': 0.1
+    },
+    'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
 }
 
 # Simple Static Scenario: Stable NE wind with NO variations
@@ -82,8 +73,8 @@ SIMPLE_STATIC_SCENARIO = {
         'pattern_scale': 128,
         'perturbation_angle_amplitude': 0.0,  # No angle perturbations
         'perturbation_strength_amplitude': 0.0,  # No strength perturbations
-        'wind_evolution_bias': (0.0, 0.0),  # No bias
-        'bias_strength': 0.0  # No bias strength
+        'rotation_bias': 0.0,        # No rotational bias
+        'bias_strength': 0.0         # No bias strength
     }
 }
 

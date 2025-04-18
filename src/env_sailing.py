@@ -475,17 +475,6 @@ class SailingEnv(gym.Env):
         perturbation_x = np.sin(X_scaled + Y_scaled + angle_phase_shift) * angle_amplitude
         perturbation_y = np.cos(X_scaled + Y_scaled + angle_phase_shift) * angle_amplitude
         
-        # Add bias to angle perturbations
-        bias_x, bias_y = self.wind_evol_params['wind_evolution_bias']
-        bias_strength = self.wind_evol_params['bias_strength']
-        if np.any(np.array([bias_x, bias_y]) != 0):  # Only apply if bias is non-zero
-            # Normalize bias vector
-            bias_norm = np.sqrt(bias_x**2 + bias_y**2)
-            bias_x, bias_y = bias_x / bias_norm, bias_y / bias_norm
-            # Add scaled bias to perturbations
-            perturbation_x += bias_x * bias_strength * angle_amplitude
-            perturbation_y += bias_y * bias_strength * angle_amplitude
-        
         # Add angle perturbations to wind field
         self.wind_field[..., 0] += perturbation_x
         self.wind_field[..., 1] += perturbation_y
@@ -493,6 +482,21 @@ class SailingEnv(gym.Env):
         # Normalize the wind vectors to maintain direction consistency
         magnitude = np.sqrt(np.sum(self.wind_field**2, axis=-1, keepdims=True))
         self.wind_field = self.wind_field / magnitude
+        
+        # Add rotational bias (instead of directional bias)
+        rotation_angle = self.wind_evol_params.get('rotation_bias', 0.0) * self.wind_evol_params['bias_strength']
+        if rotation_angle != 0:
+            # Positive angle for clockwise rotation, negative for counter-clockwise
+            cos_rot = np.cos(rotation_angle)
+            sin_rot = np.sin(rotation_angle)
+            
+            # Apply rotation matrix to each wind vector
+            wind_x = self.wind_field[..., 0].copy()
+            wind_y = self.wind_field[..., 1].copy()
+            
+            # Rotation matrix multiplication
+            self.wind_field[..., 0] = wind_x * cos_rot - wind_y * sin_rot
+            self.wind_field[..., 1] = wind_x * sin_rot + wind_y * cos_rot
         
         # Generate smooth strength perturbations (using a shifted pattern)
         strength_amplitude = self.wind_evol_params['perturbation_strength_amplitude']
@@ -524,7 +528,11 @@ class SailingEnv(gym.Env):
         wind_norm = np.linalg.norm(wind)
         if wind_norm > 0:
             wind_normalized = wind / wind_norm
-            direction_normalized = direction / np.linalg.norm(direction)
+            direction_norm = np.linalg.norm(direction)
+            if direction_norm < 1e-10:  # Check for near-zero vector
+                direction_normalized = np.array([1.0, 0.0])  # Default direction if input is zero
+            else:
+                direction_normalized = direction / direction_norm
             
             # Calculate sailing efficiency using the shared function
             sailing_efficiency = calculate_sailing_efficiency(direction_normalized, wind_normalized)
