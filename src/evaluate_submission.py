@@ -1,350 +1,314 @@
 #!/usr/bin/env python3
 """
-Evaluate Sailing Agent Submission
+Sailing Challenge - Agent Evaluation Script
 
-This script evaluates a sailing agent on specified scenarios and reports performance metrics.
-It can be used from the command line to quickly test agents without a notebook.
-
-Usage:
-    python evaluate_submission.py path/to/agent.py [options]
-
-Options:
-    --scenario SCENARIO    Name of scenario to evaluate on (default: all training scenarios)
-    --seeds SEEDS          Space-separated list of seeds (default: 10 random seeds)
-    --max_horizon N        Maximum steps per episode (default: 1000)
-    --render               Enable rendering (only works with a single seed)
-    --output FILE          Save results to a JSON file
-    --include-test         Include the hidden test scenario (evaluator use only)
-    --verbose              Show detailed evaluation results
+This script evaluates a sailing agent on specified initial windfields and reports performance metrics.
 """
 
+import argparse
+import importlib.util
+import numpy as np
 import os
 import sys
-import json
-import argparse
-import numpy as np
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, List, Tuple, Optional
 
-# Add the parent directory to sys.path
-sys.path.append(os.path.abspath('..'))
+# Add the parent directory to the path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Use relative imports
-from test_agent_validity import validate_agent
-from evaluation import evaluate_agent, visualize_trajectory
+# Import base agent type
+from agents.base_agent import BaseAgent
 
-# Import scenarios with proper path handling
+# Import evaluation functions
+from evaluation import evaluate_agent
+
+# Import initial windfields with proper path handling
 try:
-    # Try direct import first (when running from src directory)
-    from scenarios import get_scenario, SCENARIOS
-    # Try to import test scenario if available (for evaluators only)
+    from initial_windfields import get_initial_windfield, INITIAL_WINDFIELDS
+    # Try to import test initial windfield if available (for evaluators only)
     try:
-        from scenarios.private_scenarios import TEST_SCENARIO
-        HAS_TEST_SCENARIO = True
-    except (ImportError, FileNotFoundError):
-        # Add a more user-friendly message
-        HAS_TEST_SCENARIO = False
-        TEST_SCENARIO = None
+        from initial_windfields.private_initial_windfields import TEST_INITIAL_WINDFIELD
+        HAS_TEST_INITIAL_WINDFIELD = True
+    except ImportError:
+        HAS_TEST_INITIAL_WINDFIELD = False
+        TEST_INITIAL_WINDFIELD = None
 except ImportError:
-    # If that fails, try importing from parent package
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from scenarios import get_scenario, SCENARIOS
+    # If we're running from the src directory
+    from initial_windfields import get_initial_windfield, INITIAL_WINDFIELDS
     try:
-        from scenarios.private_scenarios import TEST_SCENARIO
-        HAS_TEST_SCENARIO = True
-    except (ImportError, FileNotFoundError):
-        # Add a more user-friendly message
-        HAS_TEST_SCENARIO = False
-        TEST_SCENARIO = None
-
+        from initial_windfields.private_initial_windfields import TEST_INITIAL_WINDFIELD
+        HAS_TEST_INITIAL_WINDFIELD = True
+    except ImportError:
+        HAS_TEST_INITIAL_WINDFIELD = False
+        TEST_INITIAL_WINDFIELD = None
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Evaluate a sailing agent")
+    parser = argparse.ArgumentParser(description="Evaluate a sailing agent on specified initial windfields.")
     
     parser.add_argument(
-        "agent_path",
-        type=str,
-        help="Path to the agent implementation file"
+        "agent_file",
+        help="Path to the Python file containing the agent implementation"
     )
     
     parser.add_argument(
-        "--scenario",
-        type=str,
-        default=None,
-        help="Name of scenario to evaluate on (default: all training scenarios)"
+        "--initial_windfield",
+        choices=[*INITIAL_WINDFIELDS.keys(), "test"],
+        help="Name of initial windfield to evaluate on (default: all training initial windfields)"
     )
     
     parser.add_argument(
         "--seeds",
         type=int,
-        nargs="+",
-        default=None,
-        help="Space-separated list of seeds (default: 10 random seeds)"
+        default=1,
+        help="Combined with --num-seeds, specifies starting seed (default: 1)"
     )
     
     parser.add_argument(
-        "--max_horizon",
+        "--num-seeds",
         type=int,
-        default=1000,
-        help="Maximum steps per episode (default: 1000)"
-    )
-    
-    parser.add_argument(
-        "--render",
-        action="store_true",
-        help="Enable rendering (only works with a single seed)"
-    )
-    
-    parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        help="Save results to a JSON file"
-    )
-    
-    parser.add_argument(
-        "--include-test",
-        action="store_true",
-        help="Include the hidden test scenario (evaluator use only)"
+        default=100,
+        help="Number of evaluation seeds to use (default: 100)"
     )
     
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="Show detailed evaluation results"
+        help="Show detailed evaluation information"
+    )
+    
+    parser.add_argument(
+        "--include-test",
+        action="store_true",
+        help="Include the hidden test initial windfield (evaluator use only)"
     )
     
     return parser.parse_args()
 
+def load_agent_from_file(file_path: str) -> BaseAgent:
+    """Load agent class from a file dynamically."""
+    # Get the absolute path
+    abs_path = os.path.abspath(file_path)
+    
+    # Extract module name from file path (without .py extension)
+    module_name = os.path.splitext(os.path.basename(abs_path))[0]
+    
+    # Load the module
+    spec = importlib.util.spec_from_file_location(module_name, abs_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load the agent file at {abs_path}")
+    
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    
+    # Find all classes that are subclasses of BaseAgent
+    agent_classes = [
+        cls for name, cls in module.__dict__.items()
+        if isinstance(cls, type) and issubclass(cls, BaseAgent) and cls != BaseAgent
+    ]
+    
+    if not agent_classes:
+        raise ValueError(f"No valid agent classes found in {file_path}")
+    
+    # Get the first agent class
+    agent_class = agent_classes[0]
+    
+    # Instantiate the agent
+    agent = agent_class()
+    
+    return agent
 
-def print_results(scenario_name: str, results: Dict[str, Any], is_test: bool = False, verbose: bool = False):
-    """Print evaluation results in a readable format."""
+def print_results(initial_windfield_name: str, results: Dict[str, Any], is_test: bool = False, verbose: bool = False):
+    """Print the evaluation results in a readable format."""
     if verbose:
-        print(f"\nResults for scenario: {scenario_name}" + (" (HIDDEN TEST)" if is_test else ""))
-        print("-" * 40)
-        print(f"Success Rate: {results['success_rate']:.2%}")
-        print(f"Mean Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f}")
-        print(f"Mean Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
+        # Print detailed results
+        print(f"\nResults for initial windfield: {initial_windfield_name}" + (" (HIDDEN TEST)" if is_test else ""))
+        print(f"Success rate: {results['success_rate']:.2%}")
+        print(f"Discounted rewards mean: {results['mean_reward']:.2f} ± {results['std_reward']:.2f}")
+        print(f"Step count mean: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
         
-        # Show more details for test scenario
-        if is_test:
-            print("\nIndividual results by seed:")
-            for result in results['individual_results']:
-                success = "✅" if result['success'] else "❌"
-                print(f"  Seed {result['seed']}: {success} | Reward: {result['discounted_reward']:.2f} | Steps: {result['steps']}")
+        # Show more details for test initial windfield
+        if is_test and 'individual_results' in results:
+            print("\nIndividual results for test:")
+            for i, res in enumerate(results['individual_results']):
+                print(f"Seed {res['seed']}: Reward = {res['discounted_reward']:.2f}, Steps = {res['steps']}, Success = {res['success']}")
     else:
-        # Simplified output
-        scenario_label = f"{scenario_name}" + (" (TEST)" if is_test else "")
-        print(f"{scenario_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
+        # Print simple results
+        initial_windfield_label = f"{initial_windfield_name}" + (" (TEST)" if is_test else "")
+        print(f"{initial_windfield_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
 
+def weighted_score(training_results: Dict[str, float], test_result: Dict[str, float], weights: Tuple[float, float] = (0.5, 0.5)):
+    """Calculate weighted score between training and test results."""
+    training_weight, test_weight = weights
+    
+    # Combine success rates
+    success_rate = (training_results['success_rate'] * training_weight + 
+                   test_result['success_rate'] * test_weight)
+    
+    # Combine rewards
+    reward = (training_results['reward'] * training_weight + 
+             test_result['reward'] * test_weight)
+    
+    return {
+        'success_rate': success_rate,
+        'reward': reward
+    }
 
 def main():
-    """Main evaluation function."""
-    # Parse command line arguments
+    """Main function to evaluate an agent."""
     args = parse_args()
     
-    # Validate the agent
-    print(f"Validating agent: {args.agent_path}")
-    validation_results = validate_agent(args.agent_path)
-    
-    if not validation_results['valid']:
-        print("❌ Agent validation failed:")
-        for error in validation_results['errors']:
-            print(f"  - {error}")
-        sys.exit(1)
-    
-    # Create agent instance
-    AgentClass = validation_results['agent_class']
-    agent = AgentClass()
-    print(f"✅ Successfully loaded agent: {AgentClass.__name__}")
-    
-    # Determine which scenarios to evaluate on
-    if args.scenario:
-        # Special handling for test scenario
-        if args.scenario.lower() == "test":
-            if not HAS_TEST_SCENARIO:
-                print("❌ Error: Test scenario is not available. This feature is for evaluators only.")
-                sys.exit(1)
-            scenario_names = ["test"]
-        else:
-            # Single specified scenario
-            scenario_names = [args.scenario]
-    else:
-        # All training scenarios by default
-        scenario_names = [name for name in SCENARIOS.keys() if name.startswith("training_")]
-    
-    # Add test scenario if requested via --include-test
-    if args.include_test:
-        if not HAS_TEST_SCENARIO:
-            print("❌ Error: Test scenario is not available. This feature is for evaluators only.")
-            sys.exit(1)
-        if "test" not in scenario_names:
-            scenario_names.append("test")
-    
-    # Determine seeds
-    if args.seeds:
-        seeds = args.seeds
-    else:
-        # Generate 10 random seeds if not specified
-        np.random.seed(42)  # For reproducibility
-        seeds = np.random.randint(0, 1000, 10).tolist()
-    
-    # Check if rendering is compatible with seeds
-    if args.render and len(seeds) > 1:
-        print("⚠️ Rendering only works with a single seed. Using only the first seed.")
-        seeds = [seeds[0]]
-    
-    # Store results for all scenarios
-    all_results = {}
-    
-    # Print evaluation settings
-    print(f"\nEvaluating on {len(scenario_names)} scenarios with {len(seeds)} seeds")
-    print(f"Max horizon: {args.max_horizon} steps")
-    
-    # Header for simplified output
-    if not args.verbose:
-        print("\nSCENARIO     | SUCCESS RATE | MEAN REWARD       | MEAN STEPS")
-        print("-" * 70)
-    
-    # Evaluate on each scenario
-    for scenario_name in scenario_names:
-        try:
-            # Get the scenario
-            if scenario_name.lower() == "test":
-                if not HAS_TEST_SCENARIO:
-                    raise ValueError("Test scenario is not available")
-                scenario = TEST_SCENARIO.copy()
-                is_test = True
+    try:
+        # Load the agent from the specified file
+        agent = load_agent_from_file(args.agent_file)
+        print(f"Loaded agent: {type(agent).__name__}")
+        
+        # Generate seeds for evaluation
+        seeds = list(range(args.seeds, args.seeds + args.num_seeds))
+        
+        # Determine which initial windfields to evaluate on
+        if args.initial_windfield:
+            # Special handling for test initial windfield
+            if args.initial_windfield.lower() == "test":
+                if not HAS_TEST_INITIAL_WINDFIELD:
+                    print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.")
+                    return
+                initial_windfield_names = ["test"]
             else:
-                scenario = get_scenario(scenario_name)
-                is_test = False
+                # Single specified initial windfield
+                initial_windfield_names = [args.initial_windfield]
+        else:
+            # All training initial windfields by default
+            initial_windfield_names = [name for name in INITIAL_WINDFIELDS.keys() if name.startswith("training_")]
             
-            # Add visualization parameters if rendering
-            if args.render:
-                scenario.update({
+        # Add test initial windfield if requested via --include-test
+        if args.include_test:
+            if not HAS_TEST_INITIAL_WINDFIELD:
+                print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.")
+                return
+            if "test" not in initial_windfield_names:
+                initial_windfield_names.append("test")
+        
+        # Basic statistical info about the evaluation
+        np.set_printoptions(precision=2)
+        
+        # Set up default parameters for all evaluations
+        eval_params = {
+            'max_horizon': 500,  # Increased from 200 to 500
+            'verbose': False,
+            'render': False,
+            'full_trajectory': False
+        }
+        
+        # Store results for all initial windfields
+        all_results = {}
+        
+        # Print evaluation parameters
+        print(f"\nEvaluating on {len(initial_windfield_names)} initial windfields with {len(seeds)} seeds")
+        print(f"Agent: {type(agent).__name__}")
+        print(f"Maximum steps per episode: {eval_params['max_horizon']}")
+        
+        # Print table header
+        print("\nINITIAL_WINDFIELD     | SUCCESS RATE | MEAN REWARD       | MEAN STEPS")
+        print("-" * 75)
+        
+        # Evaluate on each initial windfield
+        for initial_windfield_name in initial_windfield_names:
+            try:
+                # Get the initial windfield
+                if initial_windfield_name.lower() == "test":
+                    if not HAS_TEST_INITIAL_WINDFIELD:
+                        raise ValueError("Test initial windfield is not available")
+                    initial_windfield = TEST_INITIAL_WINDFIELD.copy()
+                    is_test = True
+                else:
+                    initial_windfield = get_initial_windfield(initial_windfield_name)
+                    is_test = False
+                
+                # Add render mode to environment parameters if not specified
+                initial_windfield.update({
                     'env_params': {
-                        'wind_grid_density': 25,
-                        'wind_arrow_scale': 80,
-                        'render_mode': "rgb_array"
+                        **initial_windfield.get('env_params', {}),
+                        'render_mode': None
                     }
                 })
-            
-            # Run evaluation
-            results = evaluate_agent(
-                agent=agent,
-                scenario=scenario,
-                seeds=seeds,
-                max_horizon=args.max_horizon,
-                verbose=True,
-                render=args.render,
-                full_trajectory=args.render
-            )
-            
-            # Store results
-            all_results[scenario_name] = results
-            
-            # Print results
-            print_results(scenario_name, results, is_test, args.verbose)
-            
-        except Exception as e:
-            print(f"❌ Error evaluating on scenario {scenario_name}: {str(e)}")
-    
-    # Calculate overall performance
-    if len(all_results) > 0:
-        # Calculate standard metrics
-        overall_success = sum(r['success_rate'] for r in all_results.values()) / len(all_results)
-        overall_reward = sum(r['mean_reward'] for r in all_results.values()) / len(all_results)
-        overall_steps = sum(r['mean_steps'] for r in all_results.values()) / len(all_results)
-        
-        # Calculate standard deviations of the means across scenarios
-        reward_means = [r['mean_reward'] for r in all_results.values()]
-        success_means = [r['success_rate'] for r in all_results.values()]
-        steps_means = [r['mean_steps'] for r in all_results.values()]
-        
-        # When there's more than one scenario, calculate std across scenarios
-        # Otherwise use the std from the single scenario
-        if len(all_results) > 1:
-            reward_std_of_means = np.std(reward_means) if len(reward_means) > 1 else 0
-            success_std_of_means = np.std(success_means) if len(success_means) > 1 else 0
-            steps_std_of_means = np.std(steps_means) if len(steps_means) > 1 else 0
-        else:
-            # For single scenario, use the scenario's own standard deviation
-            scenario = list(all_results.values())[0]
-            reward_std_of_means = scenario['std_reward']
-            success_std_of_means = 0  # Success rate doesn't have a std in scenario results
-            steps_std_of_means = scenario['std_steps']
-        
-        # Print summary
-        print("\n" + "="*70)
-        if args.verbose:
-            print(f"OVERALL SUCCESS RATE: {overall_success:.2%} ± {success_std_of_means:.2%}")
-            print(f"AVERAGE REWARD: {overall_reward:.2f} ± {reward_std_of_means:.2f}")
-            print(f"AVERAGE STEPS: {overall_steps:.1f} ± {steps_std_of_means:.1f}")
-            
-            # If test scenario was included, calculate a weighted score (50% test, 50% training)
-            if "test" in all_results:
-                test_success = all_results["test"]["success_rate"]
-                test_reward = all_results["test"]["mean_reward"]
                 
-                print("\nTEST SCENARIO PERFORMANCE:")
-                print(f"  Success Rate: {test_success:.2%}")
-                print(f"  Mean Reward: {test_reward:.2f}")
+                # Run evaluation
+                results = evaluate_agent(
+                    agent=agent,
+                    initial_windfield=initial_windfield,
+                    seeds=seeds,
+                    **eval_params
+                )
                 
-                # Calculate weighted score
-                training_scenarios = [s for s in all_results.keys() if s != "test"]
-                if training_scenarios:
-                    training_success = sum(all_results[s]['success_rate'] for s in training_scenarios) / len(training_scenarios)
-                    training_reward = sum(all_results[s]['mean_reward'] for s in training_scenarios) / len(training_scenarios)
-                    weighted_reward = 0.5 * test_reward + 0.5 * training_reward
-                    print(f"\nWEIGHTED FINAL REWARD: {weighted_reward:.2f}")
-        else:
-            # Simplified summary
-            print(f"OVERALL      | {overall_success:.2%} ± {success_std_of_means:.2%} | {overall_reward:.2f} ± {reward_std_of_means:.2f} | {overall_steps:.1f} ± {steps_std_of_means:.1f}")
-            
-            # Add test info if included
-            if "test" in all_results:
-                test_reward = all_results["test"]["mean_reward"]
-                training_scenarios = [s for s in all_results.keys() if s != "test"]
-                if training_scenarios:
-                    training_reward = sum(all_results[s]['mean_reward'] for s in training_scenarios) / len(training_scenarios)
-                    weighted_reward = 0.5 * test_reward + 0.5 * training_reward
-                    print(f"WEIGHTED FINAL REWARD: {weighted_reward:.2f} (50% test, 50% training)")
-                    
-        print("="*70)
+                # Store results
+                all_results[initial_windfield_name] = results
+                
+                # Print results
+                print_results(initial_windfield_name, results, is_test, args.verbose)
+                
+            except Exception as e:
+                print(f"❌ Error evaluating on initial windfield {initial_windfield_name}: {str(e)}")
+                if args.verbose:
+                    import traceback
+                    traceback.print_exc()
         
-        # Save results to file if requested
-        if args.output:
-            # Convert numpy values to Python native types for JSON serialization
-            json_results = {
-                "overall": {
-                    "success_rate": float(overall_success),
-                    "success_std_across_scenarios": float(success_std_of_means),
-                    "average_reward": float(overall_reward),
-                    "reward_std_across_scenarios": float(reward_std_of_means),
-                    "average_steps": float(overall_steps),
-                    "steps_std_across_scenarios": float(steps_std_of_means)
-                },
-                "scenarios": {}
-            }
+        print("-" * 75)
+        
+        # Calculate combined statistics
+        if len(all_results) > 0:
+            # Calculate means across all initial windfields
+            success_rates = np.array([r['success_rate'] for r in all_results.values()])
+            rewards = np.array([r['mean_reward'] for r in all_results.values()])
+            steps = np.array([r['mean_steps'] for r in all_results.values()])
             
-            for scenario_name, results in all_results.items():
-                json_results["scenarios"][scenario_name] = {
-                    "success_rate": float(results["success_rate"]),
-                    "mean_reward": float(results["mean_reward"]),
-                    "std_reward": float(results["std_reward"]),
-                    "mean_steps": float(results["mean_steps"]),
-                    "std_steps": float(results["std_steps"])
+            # Calculate standard deviations of the means across initial windfields
+            success_std_of_means = np.std(success_rates) if len(success_rates) > 1 else 0
+            reward_std_of_means = np.std(rewards) if len(rewards) > 1 else 0
+            steps_std_of_means = np.std(steps) if len(steps) > 1 else 0
+            
+            # When there's only one initial windfield evaluated
+            if len(all_results) == 1:
+                # For single initial windfield, use the initial windfield's own standard deviation
+                initial_windfield = list(all_results.values())[0]
+                reward_std_of_means = initial_windfield['std_reward']
+                success_std_of_means = 0  # Success rate doesn't have a std in initial windfield results
+                steps_std_of_means = initial_windfield['std_steps']
+            
+            # Print overall results
+            print(f"OVERALL      | Success: {np.mean(success_rates):.2%} ± {success_std_of_means:.2%} | "
+                  f"Reward: {np.mean(rewards):.2f} ± {reward_std_of_means:.2f} | "
+                  f"Steps: {np.mean(steps):.1f} ± {steps_std_of_means:.1f}")
+            
+            # If test initial windfield was included, calculate a weighted score (50% test, 50% training)
+            if 'test' in all_results and len(all_results) > 1:
+                test_results = all_results['test']
+                
+                # Calculate mean of training results
+                training_success = np.mean([r['success_rate'] for name, r in all_results.items() if name != 'test'])
+                training_reward = np.mean([r['mean_reward'] for name, r in all_results.items() if name != 'test'])
+                
+                print("\nTEST INITIAL WINDFIELD PERFORMANCE:")
+                print(f"Training success rate: {training_success:.2%}, Test: {test_results['success_rate']:.2%}")
+                print(f"Training avg reward: {training_reward:.2f}, Test: {test_results['mean_reward']:.2f}")
+                
+                # Calculate weighted score for reporting
+                weighted = {
+                    'success_rate': 0.5 * training_success + 0.5 * test_results['success_rate'],
+                    'reward': 0.5 * training_reward + 0.5 * test_results['mean_reward']
                 }
-            
-            # Add weighted reward if test scenario was included
-            if "test" in all_results and len(training_scenarios) > 0:
-                json_results["weighted_reward"] = float(weighted_reward)
-            
-            with open(args.output, 'w') as f:
-                json.dump(json_results, f, indent=2)
-            
-            print(f"\nResults saved to {args.output}")
-
+                
+                print(f"FINAL SCORE (50% training, 50% test):")
+                print(f"  Success rate: {weighted['success_rate']:.2%}")
+                print(f"  Average reward: {weighted['reward']:.2f}")
+        
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
+        return 1
+    
+    return 0
 
 if __name__ == "__main__":
-    main() 
+    sys.exit(main()) 

@@ -18,18 +18,18 @@ from tqdm.notebook import tqdm
 
 def evaluate_agent(
     agent: BaseAgent,
-    scenario: Dict[str, Dict[str, Any]],
+    initial_windfield: Dict[str, Dict[str, Any]],
     seeds: Union[int, List[int]],
     max_horizon: int = 1000,
     verbose: bool = False,
     render: bool = False,
     full_trajectory: bool = False
 ) -> Dict[str, Any]:
-    """Evaluate an agent on a specific scenario with given seeds.
+    """Evaluate an agent on a specific initial windfield with given seeds.
     
     Args:
         agent: The agent to evaluate
-        scenario: Dictionary containing environment parameters
+        initial_windfield: Dictionary containing environment parameters
         seeds: Either a single seed or a list of seeds
         max_horizon: Maximum number of steps per episode
         verbose: Whether to show progress bar
@@ -44,8 +44,8 @@ def evaluate_agent(
     if single_seed:
         seeds = [seeds]
     
-    # Create environment using scenario parameters
-    env_params = scenario.get('env_params', {}).copy()  # Make a copy to avoid modifying the original
+    # Create environment using initial windfield parameters
+    env_params = initial_windfield.get('env_params', {}).copy()  # Make a copy to avoid modifying the original
     
     # Set render_mode only if not already provided in env_params
     if 'render_mode' not in env_params and render:
@@ -53,8 +53,8 @@ def evaluate_agent(
     
     # Create the environment with all parameters
     env = SailingEnv(
-        wind_init_params=scenario['wind_init_params'],
-        wind_evol_params=scenario['wind_evol_params'],
+        wind_init_params=initial_windfield['wind_init_params'],
+        wind_evol_params=initial_windfield['wind_evol_params'],
         **env_params
     )
     

@@ -20,14 +20,13 @@ sys.path.append(os.path.abspath('..'))
 from agents.base_agent import BaseAgent
 from env_sailing import SailingEnv
 
-# Try different approaches to import scenarios
+# Try different approaches to import initial_windfields
 try:
-    # Try direct import first (when running from src directory)
-    from scenarios import get_scenario
+    # Direct import from the package
+    from initial_windfields import get_initial_windfield
 except ImportError:
-    # If that fails, try importing from parent package
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from scenarios import get_scenario
+    # Relative import in case the script is run from the src directory
+    from initial_windfields import get_initial_windfield
 
 
 class AgentValidityError(Exception):
@@ -259,7 +258,7 @@ def validate_agent(filepath: str) -> Dict[str, Any]:
 if __name__ == "__main__":
     # Test with submission example if no arguments provided
     if len(sys.argv) < 2:
-        test_file = os.path.join(os.path.dirname(__file__), 'agents/agent_greedy.py')
+        test_file = os.path.join(os.path.dirname(__file__), 'agents/agent_naive.py')
     else:
         test_file = sys.argv[1]
     

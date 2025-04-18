@@ -22,6 +22,11 @@ def save_qlearning_agent(agent, output_path, agent_class_name="QLearningTrainedA
     # Create output directory if it doesn't exist
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
+    # Extract agent parameters
+    position_bins = getattr(agent, 'position_bins', 8)
+    velocity_bins = getattr(agent, 'velocity_bins', 4)
+    wind_bins = getattr(agent, 'wind_bins', 8)
+    
     # Start building the file content
     file_content = f'''"""
 Q-Learning Agent for the Sailing Challenge - Trained Model
@@ -45,8 +50,9 @@ class {agent_class_name}(BaseAgent):
         self.np_random = np.random.default_rng()
         
         # State discretization parameters
-        self.position_bins = {agent.position_bins}
-        self.wind_bins = {agent.wind_bins}
+        self.position_bins = {position_bins}
+        self.velocity_bins = {velocity_bins}
+        self.wind_bins = {wind_bins}
         
         # Q-table with learned values
         self.q_table = {{}}
@@ -65,8 +71,9 @@ class {agent_class_name}(BaseAgent):
     file_content += '''
     def discretize_state(self, observation):
         """Convert continuous observation to discrete state for Q-table lookup."""
-        # Extract position and wind from observation
+        # Extract position, velocity and wind from observation
         x, y = observation[0], observation[1]
+        vx, vy = observation[2], observation[3]
         wx, wy = observation[4], observation[5]
         
         # Discretize position (assume 32x32 grid)
@@ -74,12 +81,20 @@ class {agent_class_name}(BaseAgent):
         x_bin = min(int(x / grid_size * self.position_bins), self.position_bins - 1)
         y_bin = min(int(y / grid_size * self.position_bins), self.position_bins - 1)
         
-        # Discretize wind direction to 8 directions
+        # Discretize velocity direction
+        v_magnitude = np.sqrt(vx**2 + vy**2)
+        if v_magnitude < 0.1:  # If velocity is very small, consider it as a separate bin
+            v_bin = 0
+        else:
+            v_direction = np.arctan2(vy, vx)  # Range: [-pi, pi]
+            v_bin = int(((v_direction + np.pi) / (2 * np.pi) * (self.velocity_bins-1)) + 1) % self.velocity_bins
+        
+        # Discretize wind direction
         wind_direction = np.arctan2(wy, wx)  # Range: [-pi, pi]
         wind_bin = int(((wind_direction + np.pi) / (2 * np.pi) * self.wind_bins)) % self.wind_bins
         
         # Return discrete state tuple
-        return (x_bin, y_bin, wind_bin)
+        return (x_bin, y_bin, v_bin, wind_bin)
         
     def act(self, observation):
         """Choose the best action according to the learned Q-table."""
@@ -108,4 +123,4 @@ class {agent_class_name}(BaseAgent):
     
     print(f"Agent saved to {output_path}")
     print(f"The file contains {len(agent.q_table)} state-action pairs.")
-    print(f"You can now use this file with validate_agent.ipynb and evaluate_agent.ipynb") 
+    print(f"You can now use this file with validate_agent.ipynb and evaluate_agent.ipynb")

@@ -1,5 +1,5 @@
 """
-Greedy Agent for the Sailing Challenge
+Naive Agent for the Sailing Challenge
 
 This file provides a simple agent that always goes north.
 Students can use it as a reference for how to implement a sailing agent.
@@ -8,9 +8,9 @@ Students can use it as a reference for how to implement a sailing agent.
 import numpy as np
 from agents.base_agent import BaseAgent
 
-class GreedyAgent(BaseAgent):
+class NaiveAgent(BaseAgent):
     """
-    A greedy agent for the Sailing Challenge.
+    A naive agent for the Sailing Challenge.
     
     This is a very simple agent that always chooses to go North,
     regardless of wind conditions or position. It serves as a minimal

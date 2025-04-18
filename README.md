@@ -1,10 +1,21 @@
 # SAILING CHALLENGE
 
+## Getting Started
+
+To get the challenge materials, clone this repository to your local machine using:
+
+```bash
+git clone https://github.com/trahier/RL_project_sailing.git
+cd RL_project_sailing
+```
+
 ## Challenge Presentation
 
 Welcome to the Sailing Challenge! Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
 
-The challenge provides 3 training scenarios with different wind patterns. Your agent will be evaluated on both these training scenarios and a hidden test scenario to assess its ability to generalize to new conditions.
+**IMPORTANT**: This challenge requires you to submit a pre-trained agent (policy) that maps observations to actions, NOT a learning algorithm. Your submitted agent should make decisions based on the current observation without further learning during evaluation. Think of it as submitting a fixed policy rather than an algorithm that continues to learn.
+
+The challenge provides 3 training initial windfields with different wind patterns. Your agent will be evaluated on both these training initial windfields and a hidden test initial windfield to assess its ability to generalize to new conditions.
 
 ![Sailing Environment](sailing_environment.png)
 
@@ -37,15 +48,12 @@ pip install -r requirements.txt
 We recommend exploring the notebooks in the following order:
 
 1. **challenge_walkthrough.ipynb**  
-   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the 3 training scenarios and explains how your agent will be tested on an additional hidden scenario.
+   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the 3 training initial windfields and explains how your agent will be tested on an additional hidden initial windfield.
 
-2. **wind_evolution_exploration.ipynb** (optional)  
-   A deep dive into wind patterns and their evolution over time. This helps understand how wind changes affect navigation strategies.
-
-3. **design_agent.ipynb**  
-   Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents. Use this to create your submission file.
+2. **design_agent.ipynb**  
+   Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents, including a simplified Q-learning implementation that uses only local information (position, velocity, local wind). The notebook also provides guidance on extending this agent to consider the full wind field for better performance. Use this notebook to create your submission file.
    
-4. **validate_agent.ipynb**  
+3. **validate_agent.ipynb**  
    Test that your agent implementation meets the required interface. Ensure your agent is valid before submission.
    
    Command line equivalent:
@@ -54,16 +62,16 @@ We recommend exploring the notebooks in the following order:
    python test_agent_validity.py path/to/your_submission.py
    ```
 
-5. **evaluate_agent.ipynb**  
-   Evaluate your agent's performance across different scenarios and understand the metrics used for grading.
+4. **evaluate_agent.ipynb**  
+   Evaluate your agent's performance across different initial windfields and understand the metrics used for grading.
    
    Command line equivalent:
    ```bash
    cd src
-   # Evaluate on a specific training scenario
-   python evaluate_submission.py path/to/your_submission.py --scenario training_1 --seeds 42 43 44
+   # Evaluate on a specific training initial windfield
+   python evaluate_submission.py path/to/your_submission.py --initial_windfield training_1 --seeds 42 43 44
    
-   # Evaluate on all training scenarios
+   # Evaluate on all training initial windfields
    python evaluate_submission.py path/to/your_submission.py --seeds 1 2 3 4 5
    ```
 
@@ -76,6 +84,8 @@ Your submission should consist of a **single Python file** containing your agent
 1. Define a class that inherits from `BaseAgent`
 2. Implement all required methods: `act`, `reset`, and `seed`
 3. Be validated using the validation tool provided
+
+Remember that your submission should be a pre-trained agent that can make decisions based on the current state without further learning. All training should be completed before submission.
 
 **IMPORTANT**: Submissions should follow the naming convention:
 ```
@@ -106,20 +116,20 @@ python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --
 Your submission will be evaluated based on:
 
 1. **Agent Validity (Pass/Fail)**: Your agent must pass validation checks
-2. **Training Scenario Performance**: Performance across the three training scenarios
-3. **Test Scenario Performance**: Performance on the hidden test scenario
+2. **Training Initial Windfield Performance**: Performance across the three training initial windfields
+3. **Test Initial Windfield Performance**: Performance on the hidden test initial windfield
 
-The final grade will be calculated based on a weighted combination of these factors. An agent that successfully reaches the goal in all three training scenarios is already on track to achieve a strong grade.
+The final grade will be calculated based on a weighted combination of these factors. An agent that successfully reaches the goal in all three training initial windfields is already on track to achieve a strong grade.
 
-**Note**: A valid agent that can consistently reach the goal in all training scenarios will already have a grade close to the median. Exceptional performance on the test scenario and creative approaches can further improve your grade.
+**Note**: A valid agent that can consistently reach the goal in all training initial windfields will already have a grade close to the median. Exceptional performance on the test initial windfield and creative approaches can further improve your grade.
 
 ### Challenge Timeline
 
 - **Duration**: 2 weeks
 - **Submission Limit**: Maximum 4 submissions per week
-- **Leaderboard Updates**: Mondays and Thursdays (showing performance on the test scenario)
+- **Leaderboard Updates**: Mondays and Thursdays (showing performance on the test initial windfield)
 
-All submissions will be evaluated on both training and test scenarios, but test scenario results will only be shared during leaderboard updates. This prevents overfitting to the test scenario while still providing feedback on generalization ability.
+All submissions will be evaluated on both training and test initial windfields, but test initial windfield results will only be shared during leaderboard updates. This prevents overfitting to the test initial windfield while still providing feedback on generalization ability.
 
 ## Good Luck!
 

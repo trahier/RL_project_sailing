@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Arrow
 from typing import Tuple, Dict, Any, Optional
 from src.sailing_physics import calculate_sailing_efficiency
-from src.scenarios import SIMPLE_STATIC_SCENARIO
 
 class SailingEnv(gym.Env):
     """
@@ -14,14 +13,35 @@ class SailingEnv(gym.Env):
     
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    # Default wind parameters - match the simple static scenario
-    DEFAULT_WIND_INIT_PARAMS = SIMPLE_STATIC_SCENARIO['wind_init_params']
-    DEFAULT_WIND_EVOL_PARAMS = SIMPLE_STATIC_SCENARIO['wind_evol_params']
+    # Common wind evolution parameters
+    # Wind will make a complete 180° rotation in ~100 steps on average with these parameters
+    COMMON_WIND_EVOL_PARAMS = {
+        'wind_change_prob': 1.0,      # Wind field updates on every step
+        'pattern_scale': 64,          # Scale of spatial perturbation patterns
+        'perturbation_angle_amplitude': 0.12,  # Angle perturbation per step
+        'perturbation_strength_amplitude': 0.15,  # Strength variation per step
+        'rotation_bias': 0.02,        # Clockwise rotational bias (positive = clockwise)
+        'bias_strength': 1.0          # Full strength of rotational bias
+    }
+    
+    # Default wind initialization parameters (NE wind with minimal variations)
+    DEFAULT_WIND_INIT_PARAMS = {
+        'base_speed': 4.0,
+        'base_direction': (-0.7, -0.7),  # NE wind
+        'pattern_scale': 32,
+        'pattern_strength': 0.1,     # Very small variations
+        'strength_variation': 0.1,   # Very small variations
+        'noise': 0.05                # Minimal noise
+    }
+    
+    # Default evolution parameters - use the common evolution parameters for consistency
+    DEFAULT_WIND_EVOL_PARAMS = COMMON_WIND_EVOL_PARAMS.copy()
     
     def __init__(self, 
                  grid_size=(32, 32),
                  wind_init_params=None,
                  wind_evol_params=None,
+                 static_wind=False,
                  wind_grid_density=25,
                  wind_arrow_scale=100,
                  render_mode=None,
@@ -36,6 +56,7 @@ class SailingEnv(gym.Env):
             grid_size: Tuple of (width, height) for the grid
             wind_init_params: Dictionary of wind initialization parameters
             wind_evol_params: Dictionary of wind evolution parameters
+            static_wind: If True, wind will remain static regardless of evolution parameters
             wind_grid_density: Number of wind arrows to display (default: 25)
             wind_arrow_scale: Scale factor for wind arrow visualization (default: 100)
             render_mode: How to render the environment
@@ -50,6 +71,7 @@ class SailingEnv(gym.Env):
         self.grid_size = grid_size
         self.wind_init_params = wind_init_params or self.DEFAULT_WIND_INIT_PARAMS.copy()
         self.wind_evol_params = wind_evol_params or self.DEFAULT_WIND_EVOL_PARAMS.copy()
+        self.static_wind = static_wind
         self.wind_grid_density = wind_grid_density
         self.wind_arrow_scale = wind_arrow_scale
         self.render_mode = render_mode
@@ -57,6 +79,10 @@ class SailingEnv(gym.Env):
         self.max_speed = max_speed
         self.inertia_factor = inertia_factor
         self.reward_discount_factor = reward_discount_factor
+        
+        # If static_wind is True, override the wind_change_prob to 0
+        if self.static_wind:
+            self.wind_evol_params['wind_change_prob'] = 0.0
         
         # Initialize wind field
         self.wind_field = self._generate_wind_field()
@@ -203,8 +229,8 @@ class SailingEnv(gym.Env):
         terminated = reached_goal or self.step_count >= 1000  # Increased from 200 to 1000
         truncated = False  # We don't truncate episodes
         
-        # Possibly update wind field based on wind_change_prob
-        if self.np_random.random() < self.wind_evol_params['wind_change_prob']:
+        # Only update wind field if static_wind is False
+        if not self.static_wind and self.np_random.random() < self.wind_evol_params['wind_change_prob']:
             self._update_wind_field()
         
         # Create observation
