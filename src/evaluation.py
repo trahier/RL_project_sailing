@@ -5,16 +5,16 @@ This module provides functions for evaluating and visualizing the performance
 of sailing agents in the sailing environment.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Polygon
-from IPython.display import display
-import ipywidgets as widgets
-from typing import List, Dict, Any, Tuple, Optional, Union, Callable
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+from matplotlib.patches import Circle, Polygon # type: ignore
+from IPython.display import display # type: ignore
+import ipywidgets as widgets # type: ignore
+from typing import List, Dict, Any, Tuple, Optional, Union, Callable # type: ignore
 from env_sailing import SailingEnv
 from agents.base_agent import BaseAgent
-from IPython.display import clear_output
-from tqdm.notebook import tqdm
+from IPython.display import clear_output # type: ignore
+from tqdm.notebook import tqdm # type: ignore
 
 def evaluate_agent(
     agent: BaseAgent,
@@ -176,7 +176,7 @@ def visualize_trajectory(
     frames = results['frames']
     
     if with_slider:
-        from ipywidgets import interact, IntSlider
+        from ipywidgets import interact, IntSlider # type: ignore
         
         def show_frame(frame_idx):
             plt.figure(figsize=(10, 10))
