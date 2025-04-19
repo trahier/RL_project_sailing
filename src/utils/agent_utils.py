@@ -5,7 +5,7 @@ These functions help create standalone Python files for agent submission.
 """
 
 import os
-import numpy as np
+import numpy as np # type: ignore
 
 def save_qlearning_agent(agent, output_path, agent_class_name="QLearningTrainedAgent"):
     """

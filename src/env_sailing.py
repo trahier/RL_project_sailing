@@ -1,11 +1,11 @@
-import gymnasium as gym
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Arrow
-from typing import Tuple, Dict, Any, Optional
-from src.sailing_physics import calculate_sailing_efficiency
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+from matplotlib.patches import Circle, Arrow # type: ignore
+from typing import Tuple, Dict, Any, Optional # type: ignore
+from src.sailing_physics import calculate_sailing_efficiency # type: ignore
+import gymnasium as gym # type: ignore
 
-class SailingEnv(gym.Env):
+class SailingEnv(gym.Env): # type: ignore
     """
     A sailing navigation environment where an agent must navigate from
     a starting point to a destination while accounting for wind.
@@ -47,7 +47,7 @@ class SailingEnv(gym.Env):
                  render_mode=None,
                  boat_performance=0.4,
                  max_speed=2.0,
-                 inertia_factor=0.5,
+                 inertia_factor=0.3,
                  reward_discount_factor=0.99):
         """
         Initialize the sailing environment.
@@ -100,13 +100,13 @@ class SailingEnv(gym.Env):
         self.last_action = None
         
         # Define action and observation spaces
-        self.action_space = gym.spaces.Discrete(9)  # 0-7: Move in direction, 8: Stay in place
+        self.action_space = gym.spaces.Discrete(9) # type: ignore # 0-7: Move in direction, 8: Stay in place
         
         # Calculate the shape for the full wind field (grid_size[0] x grid_size[1] x 2)
         wind_field_shape = (grid_size[0] * grid_size[1] * 2,)
         
         # Define observation space to include the full wind field
-        self.observation_space = gym.spaces.Box(
+        self.observation_space = gym.spaces.Box( # type: ignore
             low=-np.inf, 
             high=np.inf, 
             shape=(6 + wind_field_shape[0],),  # [x, y, vx, vy, wx, wy, flattened wind field]
@@ -622,4 +622,40 @@ class SailingEnv(gym.Env):
             flattened_wind      # Full wind field (flattened)
         ]).astype(np.float32)
         
-        return observation 
+        return observation
+    
+    @staticmethod
+    def visualize_observation(observation, grid_size=None):
+        """
+        Create a visualization of the environment state from an observation.
+        
+        Parameters:
+        - observation: The observation from the environment
+        - grid_size: Optional grid size. If None, will use default from SailingEnv
+        
+        Returns:
+        - img: A rendered image of the environment state
+        """
+        # Create a new environment
+        vis_env = SailingEnv()
+        
+        # If grid_size is provided, use it
+        if grid_size is not None:
+            vis_env.grid_size = grid_size
+        
+        # Extract the agent's state from the observation
+        agent_x, agent_y = observation[0], observation[1]
+        agent_vx, agent_vy = observation[2], observation[3]
+        
+        # Update the agent's state in the environment
+        vis_env.position = np.array([agent_x, agent_y])
+        vis_env.velocity = np.array([agent_vx, agent_vy])
+        
+        # Extract and reshape the wind field
+        flattened_wind = observation[6:]
+        wind_field = flattened_wind.reshape(vis_env.grid_size[1], vis_env.grid_size[0], 2)
+        vis_env.wind_field = wind_field
+        
+        # Get the rendered image array
+        img = vis_env.render()
+        return img
