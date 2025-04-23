@@ -84,7 +84,11 @@ We recommend exploring the notebooks in the following order:
 Your submission should consist of a **single Python file** containing your agent implementation. The file must:
 
 1. Define a class that inherits from `BaseAgent`
-2. Implement all required methods: `act`, `reset`, and `seed`
+2. Implement all required methods: 
+   - `__init__`: Initialize your agent (must accept no required arguments)
+   - `act(observation)`: Choose an action based on the observation (must return an integer from 0-8)
+   - `reset()`: Reset the agent's state for a new episode
+   - `seed(seed)`: Set the random seed for reproducibility
 3. Be validated using the validation tool provided
 
 Remember that your submission should be a pre-trained agent that can make decisions based on the current state without further learning. All training should be completed before submission.
@@ -104,6 +108,12 @@ cd src
 python test_agent_validity.py path/to/your/lastname_firstname_submission01.py
 ```
 
+The validation script will check that your agent:
+- Properly inherits from BaseAgent
+- Implements all required methods
+- Can be instantiated without arguments
+- Returns valid actions (integers 0-8) when given observations
+
 ### Evaluation
 
 Your agent will be evaluated on:
@@ -112,6 +122,12 @@ Your agent will be evaluated on:
 cd src
 python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --include-test
 ```
+
+### Submission Link
+
+When your agent has been validated and evaluated, submit it using the following Google Form:
+
+**Submission Form**: [https://forms.gle/nZCXLW5auGD56s8YA](https://forms.gle/nZCXLW5auGD56s8YA)
 
 ### Grading Criteria
 
