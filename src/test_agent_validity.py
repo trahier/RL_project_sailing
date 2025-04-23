@@ -3,22 +3,49 @@ Test Agent Validity
 
 This module provides functions to test if a sailing agent meets the required
 interface specifications and behaves correctly.
+
+Usage:
+    python src/test_agent_validity.py path/to/your_agent.py
+    python src/test_agent_validity.py path/to/your_agent.py --verbose
+
+Examples:
+    python src/test_agent_validity.py src/agents/agent_naive.py
+    python src/test_agent_validity.py my_custom_agent.py --verbose
 """
 
 import os
 import sys
 import importlib.util
 import inspect
+import argparse
 from pathlib import Path
 import numpy as np
 from typing import Dict, List, Any, Optional, Tuple, Type
+
+# Define color codes for terminal output
+BLUE = '\033[94m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+RED = '\033[91m'
+BOLD = '\033[1m'
+RESET = '\033[0m'
 
 # Add the parent directory to sys.path
 sys.path.append(os.path.abspath('..'))
 
 # Import with proper path handling
-from agents.base_agent import BaseAgent
-from env_sailing import SailingEnv
+try:
+    from agents.base_agent import BaseAgent
+    from env_sailing import SailingEnv
+except ImportError:
+    try:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from agents.base_agent import BaseAgent
+        from env_sailing import SailingEnv
+    except ImportError:
+        print(f"{RED}Error: Unable to import required modules.{RESET}")
+        print("Make sure you're running this script from the repository root or src directory.")
+        sys.exit(1)
 
 # Try different approaches to import initial_windfields
 try:
@@ -26,7 +53,12 @@ try:
     from initial_windfields import get_initial_windfield
 except ImportError:
     # Relative import in case the script is run from the src directory
-    from initial_windfields import get_initial_windfield
+    try:
+        from initial_windfields import get_initial_windfield
+    except ImportError:
+        print(f"{RED}Error: Unable to import initial_windfields module.{RESET}")
+        print("Make sure you're running this script from the repository root or src directory.")
+        sys.exit(1)
 
 
 class AgentValidityError(Exception):
@@ -74,8 +106,8 @@ def load_agent_class(filepath: str) -> Type[BaseAgent]:
             )
         
         if len(agent_classes) > 1:
-            print(f"Warning: Multiple agent classes found in {filepath}. "
-                  f"Using {agent_classes[0].__name__}")
+            print(f"{YELLOW}Warning: Multiple agent classes found in {filepath}. "
+                  f"Using {agent_classes[0].__name__}{RESET}")
         
         return agent_classes[0]
     
@@ -162,14 +194,16 @@ def test_agent_actions(agent_instance: BaseAgent) -> List[str]:
             # Check if action is an integer
             if not isinstance(action, (int, np.integer)):
                 issues.append(
-                    f"Agent returned non-integer action: {action} (type: {type(action)})"
+                    f"Agent returned non-integer action: {action} (type: {type(action)}). "
+                    f"The act() method must return an integer between 0 and 8."
                 )
                 break
             
             # Check if action is in valid range
             if action < 0 or action > 8:
                 issues.append(
-                    f"Agent returned out-of-range action: {action} (valid range: 0-8)"
+                    f"Agent returned out-of-range action: {action}. "
+                    f"Valid actions are integers from 0 to 8."
                 )
                 break
             
@@ -228,7 +262,10 @@ def validate_agent(filepath: str) -> Dict[str, Any]:
         try:
             agent_instance = agent_class()
         except Exception as e:
-            results['errors'].append(f"Failed to instantiate agent: {str(e)}")
+            results['errors'].append(
+                f"Failed to instantiate agent: {str(e)}\n"
+                f"Make sure your agent's __init__ method accepts no arguments."
+            )
             return results
         
         # Step 4: Test agent actions
@@ -255,32 +292,96 @@ def validate_agent(filepath: str) -> Dict[str, Any]:
     return results
 
 
-if __name__ == "__main__":
-    # Test with submission example if no arguments provided
-    if len(sys.argv) < 2:
-        test_file = os.path.join(os.path.dirname(__file__), 'agents/agent_naive.py')
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Validate a sailing agent implementation against requirements."
+    )
+    
+    parser.add_argument(
+        "agent_file",
+        nargs="?",
+        help="Path to the Python file containing your agent implementation"
+    )
+    
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show more detailed validation information"
+    )
+    
+    return parser.parse_args()
+
+
+def print_validation_results(results, verbose=False, filepath=None):
+    """Print validation results in a user-friendly format."""
+    print(f"\n🤖 {BOLD}Agent: {results['agent_name'] or 'Unknown'}{RESET}")
+    
+    if results['valid']:
+        print(f"\n{GREEN}✅ SUCCESS: Your agent meets all requirements!{RESET}")
     else:
-        test_file = sys.argv[1]
+        print(f"\n{RED}❌ FAILURE: Your agent does not meet all requirements.{RESET}")
+    
+    if results['errors']:
+        print(f"\n{RED}🛑 Errors that must be fixed:{RESET}")
+        for i, error in enumerate(results['errors'], 1):
+            print(f"  {i}. {error}")
+    
+    if results['warnings']:
+        print(f"\n{YELLOW}⚠️ Warnings (not required to fix, but recommended):{RESET}")
+        for i, warning in enumerate(results['warnings'], 1):
+            print(f"  {i}. {warning}")
+    
+    if verbose and results['valid']:
+        print(f"\n{BLUE}📋 Validation checks passed:{RESET}")
+        print("  - Agent class inherits from BaseAgent")
+        print("  - Agent implements all required methods (act, reset, seed)")
+        print("  - Agent can be instantiated without arguments")
+        print("  - Agent returns valid actions when given observations")
+    
+    print("\n" + "=" * 50)
+    
+    if results['valid']:
+        print(f"\n{GREEN}🎉 Your agent is ready for submission!{RESET}")
+        if filepath:
+            print(f"{BLUE}Run this command to test performance before submitting:{RESET}")
+            print(f"python src/evaluate_submission.py {filepath} --seeds 1 --num-seeds 10")
+    else:
+        print(f"\n{YELLOW}🔧 Please fix the errors above and validate again.{RESET}")
+        print(f"{BLUE}Review the BaseAgent class in src/agents/base_agent.py for reference.{RESET}")
+
+
+def main():
+    """Main function to validate an agent."""
+    args = parse_args()
+    
+    # Test with submission example if no arguments provided
+    if args.agent_file is None:
+        test_file = os.path.join(os.path.dirname(__file__), 'agents/agent_naive.py')
+        print(f"{YELLOW}No agent file specified. Using example agent: {test_file}{RESET}")
+        print(f"{YELLOW}Usage: python src/test_agent_validity.py path/to/your_agent.py{RESET}")
+    else:
+        test_file = args.agent_file
+        if not os.path.exists(test_file):
+            print(f"{RED}Error: File '{test_file}' not found.{RESET}")
+            return 1
+    
+    print(f"{BLUE}✨ Validating agent in: {test_file} ✨{RESET}")
+    print("=" * 50)
     
     # Validate the agent
     results = validate_agent(test_file)
     
     # Print results
-    print(f"Agent validation results for: {test_file}")
-    print(f"Agent name: {results['agent_name']}")
-    print(f"Valid: {results['valid']}")
+    print_validation_results(results, args.verbose, test_file)
     
-    if results['errors']:
-        print("\nErrors:")
-        for i, error in enumerate(results['errors'], 1):
-            print(f"{i}. {error}")
-    
-    if results['warnings']:
-        print("\nWarnings:")
-        for i, warning in enumerate(results['warnings'], 1):
-            print(f"{i}. {warning}")
-            
-    if results['valid']:
-        print("\nValidation successful! The agent meets all requirements.")
-    else:
-        print("\nValidation failed. Please fix the errors and try again.") 
+    # Return 0 if valid, 1 if not
+    return 0 if results['valid'] else 1
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print(f"\n{YELLOW}Validation cancelled by user.{RESET}")
+        sys.exit(130) 
