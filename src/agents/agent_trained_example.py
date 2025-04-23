@@ -5,7 +5,7 @@ This file contains a Q-learning agent trained on the sailing environment.
 The agent uses a discretized state space and a Q-table for decision making.
 """
 
-import numpy as np
+import numpy as np # type: ignore
 from agents.base_agent import BaseAgent
 
 class QLearningTrainedAgent(BaseAgent):
