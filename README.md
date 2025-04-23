@@ -1,5 +1,7 @@
 # SAILING CHALLENGE
 
+![Sailing Environment](illustration_challenge.png)
+
 ## Getting Started
 
 To get the challenge materials, clone this repository to your local machine using:
