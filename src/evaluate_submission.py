@@ -7,7 +7,7 @@ This script evaluates a sailing agent on specified initial windfields and report
 
 import argparse
 import importlib.util
-import numpy as np
+import numpy as np # type: ignore
 import os
 import sys
 from typing import Dict, Any, List, Tuple, Optional

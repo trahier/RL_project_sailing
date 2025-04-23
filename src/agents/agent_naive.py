@@ -5,7 +5,7 @@ This file provides a simple agent that always goes north.
 Students can use it as a reference for how to implement a sailing agent.
 """
 
-import numpy as np
+import numpy as np # type: ignore
 from agents.base_agent import BaseAgent
 
 class NaiveAgent(BaseAgent):
