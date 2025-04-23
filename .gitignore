@@ -5,6 +5,10 @@
 **/private*/
 private*/
 
+# Explicitly exclude private agents
+src/agents/private_agent_smart.py
+**/agents/private*
+
 # Common Python exclusions
 __pycache__/
 *.py[cod]
@@ -44,4 +48,4 @@ ENV/
 *.swo
 
 # Exclude files in agent directory ending with a number
-agent/*[0-9].py 
+agent/*[0-9].py private_notebooks/

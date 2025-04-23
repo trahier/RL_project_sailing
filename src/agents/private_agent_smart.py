@@ -5,11 +5,11 @@ This file provides a template for students to create their own sailing agent.
 Students should implement their solution by modifying this template.
 """
 
-import numpy as np
+import numpy as np # type: ignore
 from agents.base_agent import BaseAgent
 from sailing_physics import calculate_sailing_efficiency
 
-class SubmissionAgent(BaseAgent):
+class SmartAgent(BaseAgent):
     """
     Example agent for the Sailing Challenge.
     

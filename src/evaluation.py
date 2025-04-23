@@ -11,6 +11,7 @@ from matplotlib.patches import Circle, Polygon # type: ignore
 from IPython.display import display # type: ignore
 import ipywidgets as widgets # type: ignore
 from typing import List, Dict, Any, Tuple, Optional, Union, Callable # type: ignore
+import copy  # Add copy module for deep copying
 from env_sailing import SailingEnv
 from agents.base_agent import BaseAgent
 from IPython.display import clear_output # type: ignore
@@ -51,10 +52,10 @@ def evaluate_agent(
     if 'render_mode' not in env_params and render:
         env_params['render_mode'] = "rgb_array"
     
-    # Create the environment with all parameters
+    # Create the environment with all parameters - use deep copies of the initial windfield parameters
     env = SailingEnv(
-        wind_init_params=initial_windfield['wind_init_params'],
-        wind_evol_params=initial_windfield['wind_evol_params'],
+        wind_init_params=copy.deepcopy(initial_windfield['wind_init_params']),
+        wind_evol_params=copy.deepcopy(initial_windfield['wind_evol_params']),
         **env_params
     )
     
@@ -74,7 +75,7 @@ def evaluate_agent(
         # Reset environment and agent
         env.seed(seed)
         agent.seed(seed)
-        observation, _ = env.reset()
+        observation, _ = env.reset(seed=seed)  # Explicitly pass seed to reset
         agent.reset()
         
         # Initialize episode variables

@@ -1,7 +1,7 @@
 """Base agent class that all agents must inherit from."""
 
 from abc import ABC, abstractmethod
-import numpy as np
+import numpy as np # type: ignore
 from typing import Dict, Any, Tuple, Optional
 
 class BaseAgent(ABC):
