@@ -4,8 +4,8 @@ Sailing Physics Visualizations
 This module provides functions to visualize the sailing physics used in the environment.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
+import numpy as np # type: ignore
+import matplotlib.pyplot as plt # type: ignore
 
 def generate_velocity_polar_plot(wind_strength=1.0, boat_performance=0.4):
     """

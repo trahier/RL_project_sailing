@@ -7,9 +7,9 @@ Wind evolution is handled by the environment.
 # Define common evolution parameters (same as in SailingEnv but duplicated to avoid circular imports)
 COMMON_WIND_EVOL_PARAMS = {
     'wind_change_prob': 1.0,      # Wind field updates on every step
-    'pattern_scale': 64,          # Scale of spatial perturbation patterns
-    'perturbation_angle_amplitude': 0.12,  # Angle perturbation per step
-    'perturbation_strength_amplitude': 0.15,  # Strength variation per step
+    'pattern_scale': 128,          # Scale of spatial perturbation patterns
+    'perturbation_angle_amplitude': 0.1,  # Angle perturbation per step
+    'perturbation_strength_amplitude': 0.1,  # Strength variation per step
     'rotation_bias': 0.02,        # Clockwise rotational bias (positive = clockwise)
     'bias_strength': 1.0          # Full strength of rotational bias
 }
@@ -18,8 +18,8 @@ COMMON_WIND_EVOL_PARAMS = {
 # Characteristics: Starting with NNW wind
 TRAINING_INITIAL_WINDFIELD_1 = {
     'wind_init_params': {
-        'base_speed': 4.0,
-        'base_direction': (-0.7, -0.7),  # NNW wind
+        'base_speed': 3.0,
+        'base_direction': (-0.8, -0.2),  # NNW wind
         'pattern_scale': 32,
         'pattern_strength': 0.3,
         'strength_variation': 0.4,
@@ -33,11 +33,11 @@ TRAINING_INITIAL_WINDFIELD_1 = {
 # Characteristics: Starting with NNE wind
 TRAINING_INITIAL_WINDFIELD_2 = {
     'wind_init_params': {
-        'base_speed': 4.0,
-        'base_direction': (0, -1), 
+        'base_speed': 3.0,
+        'base_direction': (-0.2, 0.8), 
         'pattern_scale': 128,
-        'pattern_strength': 0.7,
-        'strength_variation': 0.2,
+        'pattern_strength': 0.6,
+        'strength_variation': 0.3,
         'noise': 0.1
     },
     # Include evolution params for backward compatibility
@@ -48,11 +48,11 @@ TRAINING_INITIAL_WINDFIELD_2 = {
 # Characteristics: Starting with N wind, smaller pattern scale
 TRAINING_INITIAL_WINDFIELD_3 = {
     'wind_init_params': {
-        'base_speed': 4.0,
-        'base_direction': (0.9, 0.2),  
-        'pattern_scale': 16,           
-        'pattern_strength': 0.1,
-        'strength_variation': 0.4,
+        'base_speed': 3.0,
+        'base_direction': (0.2, -0.8),  
+        'pattern_scale': 32,           
+        'pattern_strength': 0.4,
+        'strength_variation': 0.2,
         'noise': 0.1
     },
     # Include evolution params for backward compatibility
@@ -63,7 +63,7 @@ TRAINING_INITIAL_WINDFIELD_3 = {
 # This is a reference configuration - use static_wind=True when creating the environment
 SIMPLE_STATIC_INITIAL_WINDFIELD = {
     'wind_init_params': {
-        'base_speed': 4.0,
+        'base_speed': 3.0,
         'base_direction': (-0.7, -0.7),  # NE wind
         'pattern_scale': 32,
         'pattern_strength': 0.1,     # Very small variations

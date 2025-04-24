@@ -123,11 +123,13 @@ cd src
 python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --include-test
 ```
 
-### Submission Link
+### 📝 Official Submission Link
 
-When your agent has been validated and evaluated, submit it using the following Google Form:
-
-**Submission Form**: [https://forms.gle/nZCXLW5auGD56s8YA](https://forms.gle/nZCXLW5auGD56s8YA)
+<div align="center">
+<h3>⭐ SUBMIT YOUR AGENT HERE ⭐</h3>
+<h2><a href="https://forms.gle/nZCXLW5auGD56s8YA">https://forms.gle/nZCXLW5auGD56s8YA</a></h2>
+<p>After validating your agent, submit the Python file through this link before the deadline</p>
+</div>
 
 ### Grading Criteria
 
