@@ -114,21 +114,12 @@ The validation script will check that your agent:
 - Can be instantiated without arguments
 - Returns valid actions (integers 0-8) when given observations
 
-### Evaluation
-
-Your agent will be evaluated on:
-
-```bash
-cd src
-python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --include-test
-```
-
 ### 📝 Official Submission Link
 
 <div align="center">
 <h3>⭐ SUBMIT YOUR AGENT HERE ⭐</h3>
 <h2><a href="https://forms.gle/nZCXLW5auGD56s8YA">https://forms.gle/nZCXLW5auGD56s8YA</a></h2>
-<p>After validating your agent, submit the Python file through this link before the deadline</p>
+<p>After validating your agent, submit the associated python file through this link (maximum 4 submissions per week per student)</p>
 </div>
 
 ### Grading Criteria
@@ -139,9 +130,9 @@ Your submission will be evaluated based on:
 2. **Training Initial Windfield Performance**: Performance across the three training initial windfields
 3. **Test Initial Windfield Performance**: Performance on the hidden test initial windfield
 
-The final grade will be calculated based on a weighted combination of these factors. An agent that successfully reaches the goal in all three training initial windfields is already on track to achieve a strong grade.
+The final grade will be calculated based on a weighted combination of these factors.
 
-**Note**: A valid agent that can consistently reach the goal in all training initial windfields will already have a grade close to the median. Exceptional performance on the test initial windfield and creative approaches can further improve your grade.
+**Note**: A valid agent that can consistently reach the goal in all training initial windfields will already have a reasonable grade. Exceptional performance on the test initial windfield and creative approaches can further improve your grade.
 
 ### Challenge Timeline
 
@@ -155,12 +146,8 @@ All submissions will be evaluated on both training and test initial windfields, 
 
 There will be two dedicated threads in the class Slack for this challenge:
 - **Leaderboard Thread**: Weekly updates on agent performance on the test initial windfield
-- **Questions Thread**: For questions related to the challenge
-
-We encourage students to help each other by answering questions when possible. The evaluator will dedicate 1-2 hours twice per week to address unanswered questions and provide clarification.
+- **Questions Thread**: For questions related to the challenge (we encourage students to help each other by answering questions when possible). The evaluator will dedicate 1-2 hours twice per week to address unanswered questions and provide clarification.
 
 ## Good Luck!
 
 Start by carefully reading through the notebooks in the recommended order. By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent.
-
-Remember that sailing efficiently requires adapting to wind conditions - the shortest path is rarely the optimal one in sailing!
