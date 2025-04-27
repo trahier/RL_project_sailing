@@ -15,7 +15,7 @@ cd RL_project_sailing
 
 Welcome to the Sailing Challenge! Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
 
-**IMPORTANT**: This challenge requires you to submit a pre-trained agent (policy) that maps observations to actions, NOT a learning algorithm. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation. All training and policy improvement must be completed before submission. Think of it as submitting a finished product rather than an evolving algorithm.
+**IMPORTANT**: This challenge requires you to **submit a pre-trained agent (policy) that maps observations to actions, NOT a learning algorithm**. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation. All training and policy improvement must be completed before submission. Think of it as submitting a finished product rather than an evolving algorithm.
 
 The challenge provides 3 training initial windfields with different wind patterns. Your agent will be evaluated on both these training initial windfields and a hidden test initial windfield to assess its ability to generalize to new conditions.
 
@@ -33,17 +33,29 @@ To set up the environment, we recommend using a virtual environment:
 
 ```bash
 # Create a virtual environment
-python -m venv venv
+python -m venv sailing-env
 
 # Activate the virtual environment
 # On Windows:
-venv\Scripts\activate
+sailing-env\Scripts\activate
 # On macOS/Linux:
-source venv/bin/activate
+source sailing-env/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
+or using `conda`:
+```
+# Create a new conda environment
+conda create -n sailing python=3.10
+
+# Activate the environment
+conda activate sailing
+
+# Install dependencies
+pip install -r requirements.txt
+``
+
 
 ### Challenge Walkthrough
 
