@@ -45,6 +45,25 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+#### Using Conda (Recommended for Anaconda/Miniconda users)
+
+If you prefer using Conda for environment management:
+
+```bash
+# Create a new conda environment
+conda create -n sailing python=3.9
+
+# Activate the environment
+conda activate sailing
+
+# Install dependencies
+pip install -r requirements.txt
+# or with conda (may be slower but sometimes more reliable)
+# conda install --file requirements.txt
+```
+
+Note: We recommend Python 3.9 for optimal compatibility with all dependencies.
+
 ### Challenge Walkthrough
 
 We recommend exploring the notebooks in the following order:
