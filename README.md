@@ -151,21 +151,19 @@ Your submission will be evaluated based on:
 
 The final grade will be calculated based on a weighted combination of these factors.
 
-**Note**: A valid agent that can consistently reach the goal in all training initial windfields will already have a reasonable grade. Exceptional performance on the test initial windfield and creative approaches can further improve your grade.
-
 ### Challenge Timeline
 
 - **Duration**: 3 weeks (until Wednesday, May 21st at midnight)
 - **Submission Limit**: Maximum 4 submissions per week
-- **Leaderboard Updates**: Mondays and Thursdays (showing performance on the test initial windfield)
+- **Leaderboard Updates**: Every Monday (showing performance on the test initial windfield)
 
 All submissions will be evaluated on both training and test initial windfields, but test initial windfield results will only be shared during leaderboard updates. This prevents overfitting to the test initial windfield while still providing feedback on generalization ability.
 
 ### Communication
 
 There will be two dedicated threads in the class Slack for this challenge:
-- **Leaderboard Thread**: Weekly updates on agent performance on the test initial windfield
-- **Questions Thread**: For questions related to the challenge (we encourage students to help each other by answering questions when possible). The evaluator will dedicate 1-2 hours twice per week to address unanswered questions and provide clarification.
+- **General Channel #rl-challenge**: For questions related to the challenge (we encourage students to help each other by answering questions when possible). The evaluator will dedicate ~2-3h/week to address unanswered questions and provide clarification.
+- **Leaderboard Channel #rl-leaderboards**: Weekly updates on agent performance on the test initial windfield (in the form of a leaderboard)
 
 ## Good Luck!
 
