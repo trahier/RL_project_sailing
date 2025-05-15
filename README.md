@@ -153,8 +153,8 @@ The final grade will be calculated based on a weighted combination of these fact
 
 ### Challenge Timeline
 
-- **Duration**: 3 weeks (until Wednesday, May 21st at midnight)
-- **Submission Limit**: Maximum 4 submissions per week
+- **Duration**: 3 weeks (until Wednesday, May 26th at 11:59 AM)
+- **Submission Limit**: Maximum 4 submissions per week ; Maximum 1 submission on the last day
 - **Leaderboard Updates**: Every Monday (showing performance on the test initial windfield)
 
 All submissions will be evaluated on both training and test initial windfields, but test initial windfield results will only be shared during leaderboard updates. This prevents overfitting to the test initial windfield while still providing feedback on generalization ability.
