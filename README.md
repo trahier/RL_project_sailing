@@ -89,11 +89,11 @@ We recommend exploring the notebooks in the following order:
    Command line equivalent:
    ```bash
    cd src
-   # Evaluate on a specific training initial windfield
-   python evaluate_submission.py path/to/your_submission.py --initial_windfield training_1 --seeds 42 43 44
+   # Evaluate on a specific training initial windfield and on one seed
+   python evaluate_submission.py path/to/your_submission.py --initial_windfield training_1 --seeds 42
    
-   # Evaluate on all training initial windfields
-   python evaluate_submission.py path/to/your_submission.py --seeds 1 2 3 4 5
+   # Evaluate on all training initial windfields on 100 seeds (1 to 100)
+   python evaluate_submission.py path/to/your_submission.py --seeds 1 --num-seeds 100
    ```
 
 ## Submission Instructions & Grading
