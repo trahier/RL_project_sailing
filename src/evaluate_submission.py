@@ -77,6 +77,12 @@ def parse_args():
     )
     
     parser.add_argument(
+        "--show-seeds",
+        action="store_true",
+        help="Show seed information for progress tracking without full verbose output"
+    )
+    
+    parser.add_argument(
         "--include-test",
         action="store_true",
         help="Include the hidden test initial windfield (evaluator use only)"
@@ -121,20 +127,20 @@ def print_results(initial_windfield_name: str, results: Dict[str, Any], is_test:
     """Print the evaluation results in a readable format."""
     if verbose:
         # Print detailed results
-        print(f"\nResults for initial windfield: {initial_windfield_name}" + (" (HIDDEN TEST)" if is_test else ""))
-        print(f"Success rate: {results['success_rate']:.2%}")
-        print(f"Discounted rewards mean: {results['mean_reward']:.2f} ± {results['std_reward']:.2f}")
-        print(f"Step count mean: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
+        print(f"\nResults for initial windfield: {initial_windfield_name}" + (" (HIDDEN TEST)" if is_test else ""), flush=True)
+        print(f"Success rate: {results['success_rate']:.2%}", flush=True)
+        print(f"Discounted rewards mean: {results['mean_reward']:.2f} ± {results['std_reward']:.2f}", flush=True)
+        print(f"Step count mean: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}", flush=True)
         
         # Show more details for test initial windfield
         if is_test and 'individual_results' in results:
-            print("\nIndividual results for test:")
+            print("\nIndividual results for test:", flush=True)
             for i, res in enumerate(results['individual_results']):
-                print(f"Seed {res['seed']}: Reward = {res['discounted_reward']:.2f}, Steps = {res['steps']}, Success = {res['success']}")
+                print(f"Seed {res['seed']}: Reward = {res['discounted_reward']:.2f}, Steps = {res['steps']}, Success = {res['success']}", flush=True)
     else:
         # Print simple results
         initial_windfield_label = f"{initial_windfield_name}" + (" (TEST)" if is_test else "")
-        print(f"{initial_windfield_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}")
+        print(f"{initial_windfield_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}", flush=True)
 
 def weighted_score(training_results: Dict[str, float], test_result: Dict[str, float], weights: Tuple[float, float] = (0.5, 0.5)):
     """Calculate weighted score between training and test results."""
@@ -160,7 +166,7 @@ def main():
     try:
         # Load the agent from the specified file
         agent = load_agent_from_file(args.agent_file)
-        print(f"Loaded agent: {type(agent).__name__}")
+        print(f"Loaded agent: {type(agent).__name__}", flush=True)
         
         # Generate seeds for evaluation
         seeds = list(range(args.seeds, args.seeds + args.num_seeds))
@@ -170,7 +176,7 @@ def main():
             # Special handling for test initial windfield
             if args.initial_windfield.lower() == "test":
                 if not HAS_TEST_INITIAL_WINDFIELD:
-                    print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.")
+                    print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.", flush=True)
                     return
                 initial_windfield_names = ["test"]
             else:
@@ -183,7 +189,7 @@ def main():
         # Add test initial windfield if requested via --include-test
         if args.include_test:
             if not HAS_TEST_INITIAL_WINDFIELD:
-                print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.")
+                print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.", flush=True)
                 return
             if "test" not in initial_windfield_names:
                 initial_windfield_names.append("test")
@@ -203,13 +209,25 @@ def main():
         all_results = {}
         
         # Print evaluation parameters
-        print(f"\nEvaluating on {len(initial_windfield_names)} initial windfields with {len(seeds)} seeds")
-        print(f"Agent: {type(agent).__name__}")
-        print(f"Maximum steps per episode: {eval_params['max_horizon']}")
+        print(f"\nEvaluating on {len(initial_windfield_names)} initial windfields with {len(seeds)} seeds", flush=True)
+        print(f"Agent: {type(agent).__name__}", flush=True)
+        print(f"Maximum steps per episode: {eval_params['max_horizon']}", flush=True)
         
         # Print table header
-        print("\nINITIAL_WINDFIELD     | SUCCESS RATE | MEAN REWARD       | MEAN STEPS")
-        print("-" * 75)
+        print("\nINITIAL_WINDFIELD     | SUCCESS RATE | MEAN REWARD       | MEAN STEPS", flush=True)
+        print("-" * 75, flush=True)
+        
+        # Custom callback for seed-by-seed progress reporting
+        def seed_callback(seed, results):
+            """Callback function to report progress after each seed evaluation."""
+            if args.show_seeds or args.verbose:
+                print(f"Seed {seed}: Reward = {results['discounted_reward']:.2f}, Steps = {results['steps']}, Success = {results['success']}", flush=True)
+        
+        # Set verbose parameter if show_seeds is enabled
+        if args.show_seeds and not args.verbose:
+            print_seed_info = True
+        else:
+            print_seed_info = args.verbose
         
         # Evaluate on each initial windfield
         for initial_windfield_name in initial_windfield_names:
@@ -237,6 +255,7 @@ def main():
                     agent=agent,
                     initial_windfield=initial_windfield,
                     seeds=seeds,
+                    seed_callback=seed_callback if print_seed_info else None,
                     **eval_params
                 )
                 
@@ -247,12 +266,12 @@ def main():
                 print_results(initial_windfield_name, results, is_test, args.verbose)
                 
             except Exception as e:
-                print(f"❌ Error evaluating on initial windfield {initial_windfield_name}: {str(e)}")
+                print(f"❌ Error evaluating on initial windfield {initial_windfield_name}: {str(e)}", flush=True)
                 if args.verbose:
                     import traceback
                     traceback.print_exc()
         
-        print("-" * 75)
+        print("-" * 75, flush=True)
         
         # Calculate combined statistics
         if len(all_results) > 0:
@@ -275,9 +294,9 @@ def main():
                 steps_std_of_means = initial_windfield['std_steps']
             
             # Print overall results
-            print(f"OVERALL      | Success: {np.mean(success_rates):.2%} ± {success_std_of_means:.2%} | "
-                  f"Reward: {np.mean(rewards):.2f} ± {reward_std_of_means:.2f} | "
-                  f"Steps: {np.mean(steps):.1f} ± {steps_std_of_means:.1f}")
+            print(f"OVERALL      | Success: {np.mean(success_rates):.2%} ± {success_std_of_means:.2%}", flush=True)
+            print(f"Reward: {np.mean(rewards):.2f} ± {reward_std_of_means:.2f}", flush=True)
+            print(f"Steps: {np.mean(steps):.1f} ± {steps_std_of_means:.1f}", flush=True)
             
             # If test initial windfield was included, calculate a weighted score (50% test, 50% training)
             if 'test' in all_results and len(all_results) > 1:
@@ -287,9 +306,11 @@ def main():
                 training_success = np.mean([r['success_rate'] for name, r in all_results.items() if name != 'test'])
                 training_reward = np.mean([r['mean_reward'] for name, r in all_results.items() if name != 'test'])
                 
-                print("\nTEST INITIAL WINDFIELD PERFORMANCE:")
-                print(f"Training success rate: {training_success:.2%}, Test: {test_results['success_rate']:.2%}")
-                print(f"Training avg reward: {training_reward:.2f}, Test: {test_results['mean_reward']:.2f}")
+                print("\nTEST INITIAL WINDFIELD PERFORMANCE:", flush=True)
+                print(f"Training success rate: {training_success:.2%}", flush=True)
+                print(f"Test: {test_results['success_rate']:.2%}", flush=True)
+                print(f"Training avg reward: {training_reward:.2f}", flush=True)
+                print(f"Test: {test_results['mean_reward']:.2f}", flush=True)
                 
                 # Calculate weighted score for reporting
                 weighted = {
@@ -297,12 +318,12 @@ def main():
                     'reward': 0.5 * training_reward + 0.5 * test_results['mean_reward']
                 }
                 
-                print(f"FINAL SCORE (50% training, 50% test):")
-                print(f"  Success rate: {weighted['success_rate']:.2%}")
-                print(f"  Average reward: {weighted['reward']:.2f}")
+                print(f"\nFINAL SCORE (50% training, 50% test):", flush=True)
+                print(f"  Success rate: {weighted['success_rate']:.2%}", flush=True)
+                print(f"  Average reward: {weighted['reward']:.2f}", flush=True)
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"❌ Error: {str(e)}", flush=True)
         if args.verbose:
             import traceback
             traceback.print_exc()

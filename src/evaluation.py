@@ -24,7 +24,8 @@ def evaluate_agent(
     max_horizon: int = 1000,
     verbose: bool = False,
     render: bool = False,
-    full_trajectory: bool = False
+    full_trajectory: bool = False,
+    seed_callback: Optional[Callable[[int, Dict[str, Any]], None]] = None
 ) -> Dict[str, Any]:
     """Evaluate an agent on a specific initial windfield with given seeds.
     
@@ -36,6 +37,7 @@ def evaluate_agent(
         verbose: Whether to show progress bar
         render: Whether to render frames
         full_trajectory: Whether to store all frames or just the last one
+        seed_callback: Callback function called after each seed evaluation with (seed, result) parameters
         
     Returns:
         Dictionary containing evaluation results
@@ -120,6 +122,15 @@ def evaluate_agent(
                 episode_success = reward > 0 or (info.get('distance_to_goal', float('inf')) < 1.5)
                 break
         
+        # Create result for this seed
+        seed_result = {
+            'seed': seed,
+            'reward': total_reward,
+            'discounted_reward': total_discounted_reward,
+            'steps': steps,
+            'success': episode_success
+        }
+        
         # Store results
         all_rewards.append(total_reward)
         all_discounted_rewards.append(total_discounted_reward)
@@ -130,13 +141,11 @@ def evaluate_agent(
             actions = episode_actions
         
         # Store individual episode results
-        individual_results.append({
-            'seed': seed,
-            'reward': total_reward,
-            'discounted_reward': total_discounted_reward,
-            'steps': steps,
-            'success': episode_success
-        })
+        individual_results.append(seed_result)
+        
+        # Call seed callback if provided
+        if seed_callback is not None:
+            seed_callback(seed, seed_result)
     
     # Compute statistics
     results = {
