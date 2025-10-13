@@ -27,6 +27,34 @@ The sailing environment features:
 - Physics-based boat movement influenced by wind direction and strength
 - Success depends on understanding sailing physics and adapting to changing wind conditions
 
+## Challenge Progression
+
+### 🎯 Phase 1: Static Headwind Challenge (Until End of October)
+**Current Focus!** Master the basics with a simple static headwind scenario.
+
+The **Static Headwind** initial windfield provides a perfect learning environment:
+- **Pure North wind** (headwind) with minimal variations
+- **No wind evolution** - the wind pattern stays constant throughout the episode
+- **Small spatial variations** in direction (slight NE/NW deviations) and amplitude
+- **Perfect for learning** basic sailing physics without complex wind dynamics
+
+This first phase teaches challengers:
+- How to navigate against a headwind using an appropriately designed agent
+- Understanding sailing efficiency at different angles to wind
+- Basic agent implementation and environment interaction
+- The importance of strategic planning in sailing
+
+**Goal**: Create an agent that can successfully navigate from bottom to top against a static north wind using an appropriate strategy.
+
+**Evaluation**: Your agent will be evaluated only on the static headwind scenario during this phase. The leaderboard will be updated regularly to track progress.
+
+### 🚀 Phase 2: Full Reinforcement Learning Challenge (After October)
+Once you've mastered the static headwind, progress to the full RL challenge with dynamic wind conditions and multiple training scenarios.
+
+The challenge provides 3 training initial windfields with different wind patterns. Your agent will be evaluated on both these training initial windfields and a hidden test initial windfield to assess its ability to generalize to new conditions.
+
+**This is the ultimate challenge of RL**: Training an agent on known environments and evaluating its ability to generalize to unseen conditions - the core goal of reinforcement learning.
+
 ### Installation Requirements
 
 To set up the environment, we recommend using a virtual environment:
@@ -69,7 +97,7 @@ Note: We recommend Python 3.9 for optimal compatibility with all dependencies.
 We recommend exploring the notebooks in the following order:
 
 1. **challenge_walkthrough.ipynb**  
-   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the 3 training initial windfields and explains how your agent will be tested on an additional hidden initial windfield.
+   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the static headwind scenario and the 3 training initial windfields, explaining how your agent will be tested on an additional hidden initial windfield.
 
 2. **design_agent.ipynb**  
    Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents, including a simplified Q-learning implementation that uses only local information (position, velocity, local wind). The notebook also provides guidance on extending this agent to consider the full wind field for better performance. Use this notebook to create your submission file.
@@ -89,6 +117,9 @@ We recommend exploring the notebooks in the following order:
    Command line equivalent:
    ```bash
    cd src
+   # Evaluate on the static headwind (first step)
+   python evaluate_submission.py path/to/your_submission.py --initial_windfield static_headwind --seeds 42
+   
    # Evaluate on a specific training initial windfield and on one seed
    python evaluate_submission.py path/to/your_submission.py --initial_windfield training_1 --seeds 42
    
@@ -96,7 +127,11 @@ We recommend exploring the notebooks in the following order:
    python evaluate_submission.py path/to/your_submission.py --seeds 1 --num-seeds 100
    ```
 
-## Submission Instructions & Grading
+## Phase 1: Static Headwind Submission (Until End of October)
+
+### Current Focus: Static Headwind Challenge
+
+For the upcoming weeks (until end of October), the challenge is to submit an agent that works correctly on the **static headwind** scenario. Your agent will be evaluated only on this initial windfield during this phase.
 
 ### Submission Format
 
@@ -110,21 +145,26 @@ Your submission should consist of a **single Python file** containing your agent
    - `seed(seed)`: Set the random seed for reproducibility
 3. Be validated using the validation tool provided
 
-Remember that your submission should be a pre-trained agent that can make decisions based on the current state without further learning. All training should be completed before submission.
-
 **IMPORTANT**: Submissions should follow the naming convention:
 ```
 lastname_firstname_submission01.py
 ```
 Use sequential numbering for multiple submissions (e.g., `lastname_firstname_submission02.py`).
 
-### Validation
+### Validation and Evaluation
 
 Before submitting, validate your agent:
 
 ```bash
 cd src
 python test_agent_validity.py path/to/your/lastname_firstname_submission01.py
+```
+
+Then evaluate your agent on the static headwind:
+
+```bash
+cd src
+python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --initial_windfield static_headwind --seeds 1 --num-seeds 100
 ```
 
 The validation script will check that your agent:
@@ -141,6 +181,16 @@ The validation script will check that your agent:
 <p>After validating your agent, submit the associated python file through this link</p>
 </div>
 
+**Note**: Uploading the challenge to the Codabench platform is currently in progress. A submission link will be promptly provided that will allow automatic evaluation of agents and circumvent the need for manual submission via Google Form.
+
+**Leaderboard**: The leaderboard will be updated regularly during the upcoming two weeks to track progress on the static headwind challenge.
+
+## Phase 2: Full Reinforcement Learning Challenge (After October)
+
+After the first phase, we will move forward to **train** agents on several training initial windfields and evaluate them on both these windfields and a hidden test initial windfield. This represents the ultimate challenge of reinforcement learning: being able to generalize to an environment with common dynamics but which was not exactly seen during the learning phase.
+
+This second phase will be the main focus of the challenge after the second phase of the bootcamp, where we dive deeper into advanced reinforcement learning techniques.
+
 <!-- ### Grading Criteria
 
 Your submission will be evaluated based on:
@@ -154,21 +204,31 @@ The final grade will be calculated based on a weighted combination of these fact
 
 ### Challenge Timeline
 
-- **Duration**: 2 months (until Friday, December 12th)
-<!-- - **Submission Limit**: Maximum 4 submissions per week ; Maximum 1 submission on the last day -->
+**Phase 1 (Current - Until End of October)**:
+- **Focus**: Static headwind challenge only
+- **Evaluation**: Agents evaluated on static headwind scenario
+- **Leaderboard Updates**: Regular updates during the upcoming two weeks
+
+**Phase 2 (After October)**:
+- **Focus**: Full reinforcement learning challenge
+- **Training**: Multiple training initial windfields
+- **Evaluation**: Training windfields + hidden test windfield
+- **Duration**: Until Friday, December 12th
 - **Leaderboard Updates**: Every Monday (showing performance on the test initial windfield)
 
-All submissions will be evaluated on both training and test initial windfields, but test initial windfield results will only be shared during leaderboard updates. This prevents overfitting to the test initial windfield while still providing feedback on generalization ability.
+This two-phase approach allows challengers to master basic sailing physics before tackling the full RL challenge with dynamic wind conditions and generalization requirements.
 
 ### Communication
 
 Please use the #rl-bootcamp-2025 chan to ask your questions and discuss any challenge-related topics
 
 <!-- There will be two dedicated threads in the class Slack for this challenge:
-- **General Channel #rl-challenge**: For questions related to the challenge (we encourage students to help each other by answering questions when possible). The evaluator will dedicate ~2-3h/week to address unanswered questions and provide clarification.
+- **General Channel #rl-challenge**: For questions related to the challenge (we encourage challengers to help each other by answering questions when possible). The evaluator will dedicate ~2-3h/week to address unanswered questions and provide clarification.
 - **Leaderboard Channel #rl-leaderboards**: Weekly updates on agent performance on the test initial windfield (in the form of a leaderboard)
 -->
 
 ## Good Luck!
 
-Start by carefully reading through the notebooks in the recommended order. By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent.
+Start by mastering the **Static Headwind** scenario to understand the basics of sailing physics and agent navigation. Once you can successfully navigate against a static headwind using proper tacking techniques, you'll be ready to tackle the full challenge with dynamic wind conditions!
+
+By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent that can handle both simple static conditions and complex dynamic wind patterns.

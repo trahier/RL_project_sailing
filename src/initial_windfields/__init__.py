@@ -59,6 +59,29 @@ TRAINING_INITIAL_WINDFIELD_3 = {
     'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
 }
 
+# Static Headwind: Pure North Wind with minimal variations
+# This is the first step of the challenge - a simple static headwind
+# Perfect for learning basic sailing physics without complex wind dynamics
+STATIC_HEADWIND_INITIAL_WINDFIELD = {
+    'wind_init_params': {
+        'base_speed': 3.0,
+        'base_direction': (0.0, -1.0),  # Pure North wind (headwind)
+        'pattern_scale': 64,           # Moderate spatial scale
+        'pattern_strength': 0.2,       # Small directional variations (NE/NW)
+        'strength_variation': 0.15,    # Small amplitude variations
+        'noise': 0.08                  # Slight randomness while maintaining north-south direction
+    },
+    # Static params - no wind evolution
+    'wind_evol_params': {
+        'wind_change_prob': 0.0,
+        'pattern_scale': 128,
+        'perturbation_angle_amplitude': 0.0,
+        'perturbation_strength_amplitude': 0.0,
+        'rotation_bias': 0.0,
+        'bias_strength': 0.0
+    }
+}
+
 # Simple Static Initial Windfield: Stable NE wind with minimal variations
 # This is a reference configuration - use static_wind=True when creating the environment
 SIMPLE_STATIC_INITIAL_WINDFIELD = {
@@ -84,6 +107,7 @@ SIMPLE_STATIC_INITIAL_WINDFIELD = {
 
 # Dictionary mapping initial windfield names to their parameters
 INITIAL_WINDFIELDS = {
+    'static_headwind': STATIC_HEADWIND_INITIAL_WINDFIELD,
     'training_1': TRAINING_INITIAL_WINDFIELD_1,
     'training_2': TRAINING_INITIAL_WINDFIELD_2,
     'training_3': TRAINING_INITIAL_WINDFIELD_3,
@@ -95,7 +119,7 @@ def get_initial_windfield(name):
     Get the parameters for a specific initial windfield.
     
     Args:
-        name: String, one of ['training_1', 'training_2', 'training_3', 'simple_static']
+        name: String, one of ['static_headwind', 'training_1', 'training_2', 'training_3', 'simple_static']
         
     Returns:
         Dictionary containing wind_init_params and wind_evol_params
