@@ -32,11 +32,11 @@ The sailing environment features:
 ### 🎯 Phase 1: Static Headwind Challenge (Until End of October)
 **Current Focus!** Master the basics with a simple static headwind scenario.
 
-The **Static Headwind** initial windfield provides a perfect learning environment:
+The **Static Headwind** initial windfield provides a perfect environment for getting familiar with sailing:
 - **Pure North wind** (headwind) with minimal variations
 - **No wind evolution** - the wind pattern stays constant throughout the episode
 - **Small spatial variations** in direction (slight NE/NW deviations) and amplitude
-- **Perfect for learning** basic sailing physics without complex wind dynamics
+- **Perfect for discovering** basic sailing physics without complex wind dynamics
 
 This first phase teaches challengers:
 - How to navigate against a headwind using an appropriately designed agent
@@ -229,6 +229,6 @@ Please use the #rl-bootcamp-2025 chan to ask your questions and discuss any chal
 
 ## Good Luck!
 
-Start by mastering the **Static Headwind** scenario to understand the basics of sailing physics and agent navigation. Once you can successfully navigate against a static headwind using proper tacking techniques, you'll be ready to tackle the full challenge with dynamic wind conditions!
+Start by mastering the **Static Headwind** scenario to understand the basics of sailing physics and agent navigation. Once you can successfully navigate against a static headwind using an appropriate strategy, you'll be ready to tackle the full challenge with dynamic wind conditions!
 
 By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent that can handle both simple static conditions and complex dynamic wind patterns.
