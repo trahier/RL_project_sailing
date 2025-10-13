@@ -15,7 +15,7 @@ cd RL_project_sailing
 
 Welcome to the Sailing Challenge! Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
 
-**IMPORTANT**: This challenge requires you to **submit a pre-trained agent (policy) that maps observations to actions**, NOT a learning algorithm. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation. All training and policy improvement must be completed before submission. Think of it as submitting a finished product rather than an evolving algorithm.
+**IMPORTANT**: This challenge requires you to **submit a pre-trained agent (policy) that maps observations to actions**, NOT a learning algorithm. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation. All training and policy improvement must be completed before submission. Think of it as submitting a finished product rather than an evolving algorithm. The repo contains pedagogical notebooks to guide you towards designing your first agent, and suggesting ways to improve it in order to win the race!
 
 The challenge provides 3 training initial windfields with different wind patterns. Your agent will be evaluated on both these training initial windfields and a hidden test initial windfield to assess its ability to generalize to new conditions.
 
@@ -138,10 +138,10 @@ The validation script will check that your agent:
 <div align="center">
 <h3>⭐ SUBMIT YOUR AGENT HERE ⭐</h3>
 <h2><a href="https://forms.gle/nZCXLW5auGD56s8YA">https://forms.gle/nZCXLW5auGD56s8YA</a></h2>
-<p>After validating your agent, submit the associated python file through this link (maximum 4 submissions per week per student)</p>
+<p>After validating your agent, submit the associated python file through this link</p>
 </div>
 
-### Grading Criteria
+<!-- ### Grading Criteria
 
 Your submission will be evaluated based on:
 
@@ -150,20 +150,24 @@ Your submission will be evaluated based on:
 3. **Test Initial Windfield Performance**: Performance on the hidden test initial windfield
 
 The final grade will be calculated based on a weighted combination of these factors.
+-->
 
 ### Challenge Timeline
 
-- **Duration**: 3 weeks (until Wednesday, May 26th at 11:59 AM)
-- **Submission Limit**: Maximum 4 submissions per week ; Maximum 1 submission on the last day
+- **Duration**: 2 months (until Friday, December 12th)
+<!-- - **Submission Limit**: Maximum 4 submissions per week ; Maximum 1 submission on the last day -->
 - **Leaderboard Updates**: Every Monday (showing performance on the test initial windfield)
 
 All submissions will be evaluated on both training and test initial windfields, but test initial windfield results will only be shared during leaderboard updates. This prevents overfitting to the test initial windfield while still providing feedback on generalization ability.
 
 ### Communication
 
-There will be two dedicated threads in the class Slack for this challenge:
+Please use the #rl-bootcamp-2025 chan to ask your questions and discuss any challenge-related topics
+
+<!-- There will be two dedicated threads in the class Slack for this challenge:
 - **General Channel #rl-challenge**: For questions related to the challenge (we encourage students to help each other by answering questions when possible). The evaluator will dedicate ~2-3h/week to address unanswered questions and provide clarification.
 - **Leaderboard Channel #rl-leaderboards**: Weekly updates on agent performance on the test initial windfield (in the form of a leaderboard)
+-->
 
 ## Good Luck!
 
