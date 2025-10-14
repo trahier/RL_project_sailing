@@ -392,7 +392,10 @@ class SailingEnv(gym.Env): # type: ignore
         fig.tight_layout()
         fig.canvas.draw()
         img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        # Calculate actual dimensions from buffer size
+        total_pixels = len(img) // 3
+        side_length = int(np.sqrt(total_pixels))
+        img = img.reshape((side_length, side_length, 3))
         
         plt.close(fig)
         

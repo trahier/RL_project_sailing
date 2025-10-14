@@ -199,7 +199,7 @@ def main():
         
         # Set up default parameters for all evaluations
         eval_params = {
-            'max_horizon': 500,  # Increased from 200 to 500
+            'max_horizon': 1000,  # Increased to 1000 for better success rates
             'verbose': False,
             'render': False,
             'full_trajectory': False
