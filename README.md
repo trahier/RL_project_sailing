@@ -105,6 +105,8 @@ We recommend exploring the notebooks in the following order:
 <h2><a href="https://www.codabench.org/competitions/11061/?secret_key=8c8f39fb-01d5-425f-81ef-b812a6f1f9f2">Codabench Submission Link</a></h2>
 </div>
 
+**Important Note**: For now, the challenge is in its first phase (discovering the environment and agent design), and for this reason, agents are only evaluated against the static headwind on Codabench. In the next phase, more complex winds (such as the three training initial windfields and the hidden one) will be implemented on Codabench. Note that if challengers submit on the direct submission link OR on Codabench, I can also evaluate their agent on dynamic winds (including the hidden test wind) for curiosity.
+
 #### Codabench Submission Requirements
 
 To submit an agent to this challenge, upload a **ZIP file** whose root directory contains at least one `.py` file defining a class called `MyAgent`.
