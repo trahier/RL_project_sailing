@@ -4,20 +4,18 @@
 
 ## Getting Started
 
-To get the challenge materials, clone this repository to your local machine using:
+Clone this repository to your local machine:
 
 ```bash
 git clone https://github.com/trahier/RL_project_sailing.git
 cd RL_project_sailing
 ```
 
-## Challenge Presentation
+## Challenge Overview
 
-Welcome to the Sailing Challenge! Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
+Your mission is to develop an intelligent agent capable of navigating a sailboat from a starting point to a destination under varying wind conditions. This environment simulates sailing physics where the boat's movement is influenced by wind direction and intensity, requiring strategic planning to reach the goal efficiently.
 
-**IMPORTANT**: This challenge requires you to **submit a pre-trained agent (policy) that maps observations to actions**, NOT a learning algorithm. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation. All training and policy improvement must be completed before submission. Think of it as submitting a finished product rather than an evolving algorithm. The repo contains pedagogical notebooks to guide you towards designing your first agent, and suggesting ways to improve it in order to win the race!
-
-The challenge provides 3 training initial windfields with different wind patterns. Your agent will be evaluated on both these training initial windfields and a hidden test initial windfield to assess its ability to generalize to new conditions.
+**IMPORTANT**: This challenge requires you to **submit a pre-trained agent (policy) that maps observations to actions**, NOT a learning algorithm. Your submitted agent should be a fixed mapping from states to actions that makes decisions based on the current observation without further learning during evaluation.
 
 ![Sailing Environment](sailing_environment.png)
 
@@ -38,15 +36,7 @@ The **Static Headwind** initial windfield provides a perfect environment for get
 - **Small spatial variations** in direction (slight NE/NW deviations) and amplitude
 - **Perfect for discovering** basic sailing physics without complex wind dynamics
 
-This first phase teaches challengers:
-- How to navigate against a headwind using an appropriately designed agent
-- Understanding sailing efficiency at different angles to wind
-- Basic agent implementation and environment interaction
-- The importance of strategic planning in sailing
-
 **Goal**: Create an agent that can successfully navigate from bottom to top against a static north wind using an appropriate strategy.
-
-**Evaluation**: Your agent will be evaluated only on the static headwind scenario during this phase. The leaderboard will be updated regularly to track progress.
 
 ### 🚀 Phase 2: Full Reinforcement Learning Challenge (After October)
 Once you've mastered the static headwind, progress to the full RL challenge with dynamic wind conditions and multiple training scenarios.
@@ -55,9 +45,9 @@ The challenge provides 3 training initial windfields with different wind pattern
 
 **This is the ultimate challenge of RL**: Training an agent on known environments and evaluating its ability to generalize to unseen conditions - the core goal of reinforcement learning.
 
-### Installation Requirements
+## Installation
 
-To set up the environment, we recommend using a virtual environment:
+We recommend using a virtual environment:
 
 ```bash
 # Create a virtual environment
@@ -75,8 +65,6 @@ pip install -r requirements.txt
 
 #### Using Conda (Recommended for Anaconda/Miniconda users)
 
-If you prefer using Conda for environment management:
-
 ```bash
 # Create a new conda environment
 conda create -n sailing-env python=3.9
@@ -86,69 +74,79 @@ conda activate sailing-env
 
 # Install dependencies
 pip install -r requirements.txt
-# or with conda (may be slower but sometimes more reliable)
-# conda install --file requirements.txt
 ```
 
 Note: We recommend Python 3.9 for optimal compatibility with all dependencies.
 
-### Challenge Walkthrough
+## Getting Started with the Challenge
 
 We recommend exploring the notebooks in the following order:
 
 1. **challenge_walkthrough.ipynb**  
-   Introduction to the sailing challenge, environment mechanics, and agent interaction. This notebook presents the static headwind scenario and the 3 training initial windfields, explaining how your agent will be tested on an additional hidden initial windfield.
+   Introduction to the sailing challenge, environment mechanics, and agent interaction.
 
 2. **design_agent.ipynb**  
-   Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents, including a simplified Q-learning implementation that uses only local information (position, velocity, local wind). The notebook also provides guidance on extending this agent to consider the full wind field for better performance. Use this notebook to create your submission file.
-   
+   Learn how to develop your own sailing agent. This notebook guides you through creating either rule-based agents or training reinforcement learning agents.
+
 3. **validate_agent.ipynb**  
-   Test that your agent implementation meets the required interface. Ensure your agent is valid before submission.
-   
-   Command line equivalent:
-   ```bash
-   cd src
-   python test_agent_validity.py path/to/your_submission.py
-   ```
+   Test that your agent implementation meets the required interface.
 
 4. **evaluate_agent.ipynb**  
-   Evaluate your agent's performance across different initial windfields and understand the metrics used for grading.
-   
-   Command line equivalent:
-   ```bash
-   cd src
-   # Evaluate on the static headwind (first step)
-   python evaluate_submission.py path/to/your_submission.py --initial_windfield static_headwind --seeds 42
-   
-   # Evaluate on a specific training initial windfield and on one seed
-   python evaluate_submission.py path/to/your_submission.py --initial_windfield training_1 --seeds 42
-   
-   # Evaluate on all training initial windfields on 100 seeds (1 to 100)
-   python evaluate_submission.py path/to/your_submission.py --seeds 1 --num-seeds 100
-   ```
+   Evaluate your agent's performance across different initial windfields.
 
-## Phase 1: Static Headwind Submission (Until End of October)
+## Submission Instructions
 
-### Current Focus: Static Headwind Challenge
+### 🎯 Primary Submission Method: Codabench
 
-For the upcoming weeks (until end of October), the challenge is to submit an agent that works correctly on the **static headwind** scenario. Your agent will be evaluated only on this initial windfield during this phase.
+**Submit your agent via Codabench for automatic evaluation:**
 
-### Submission Format
+<div align="center">
+<h3>⭐ SUBMIT YOUR AGENT HERE ⭐</h3>
+<h2><a href="https://www.codabench.org/competitions/11061/?secret_key=8c8f39fb-01d5-425f-81ef-b812a6f1f9f2">Codabench Submission Link</a></h2>
+</div>
 
-Your submission should consist of a **single Python file** containing your agent implementation. The file must:
+#### Codabench Submission Requirements
 
-1. Define a class that inherits from `BaseAgent`
-2. Implement all required methods: 
-   - `__init__`: Initialize your agent (must accept no required arguments)
-   - `act(observation)`: Choose an action based on the observation (must return an integer from 0-8)
-   - `reset()`: Reset the agent's state for a new episode
-   - `seed(seed)`: Set the random seed for reproducibility
-3. Be validated using the validation tool provided
+To submit an agent to this challenge, upload a **ZIP file** whose root directory contains at least one `.py` file defining a class called `MyAgent`.
 
-**IMPORTANT**: Submissions should follow the naming convention:
+Your main file must start with this import and class declaration:
+```python
+from evaluator.base_agent import BaseAgent
+
+class MyAgent(BaseAgent):
+    ...
+```
+
+This import is mandatory: it loads the official BaseAgent interface provided by the evaluation bundle. Your class must inherit from BaseAgent.
+
+The key method to implement is:
+```python
+def act(self, obs, info=None):
+    """Return an action given the current observation."""
+    ...
+```
+
+#### How to Submit on Codabench
+
+1. **Prepare your agent**: Create a Python file with your `MyAgent` class
+2. **Create a ZIP file**: Put your Python file in the root directory of a ZIP archive
+3. **Upload to Codabench**: Use the submission link above
+4. **Monitor results**: Check the leaderboard for your performance
+
+### 🔄 Alternative Submission Method: Direct Upload
+
+If Codabench is not available, you can submit directly via Google Form:
+
+<div align="center">
+<h3>📝 Alternative Submission Link</h3>
+<h2><a href="https://forms.gle/nZCXLW5auGD56s8YA">Google Form Submission</a></h2>
+</div>
+
+**For direct submission, follow this naming convention:**
 ```
 lastname_firstname_submission01.py
 ```
+
 Use sequential numbering for multiple submissions (e.g., `lastname_firstname_submission02.py`).
 
 ### Validation and Evaluation
@@ -157,52 +155,17 @@ Before submitting, validate your agent:
 
 ```bash
 cd src
-python test_agent_validity.py path/to/your/lastname_firstname_submission01.py
+python test_agent_validity.py path/to/your/agent.py
 ```
 
 Then evaluate your agent on the static headwind:
 
 ```bash
 cd src
-python evaluate_submission.py path/to/your/lastname_firstname_submission01.py --initial_windfield static_headwind --seeds 1 --num-seeds 100
+python evaluate_submission.py path/to/your/agent.py --initial_windfield static_headwind --seeds 1 --num-seeds 100
 ```
 
-The validation script will check that your agent:
-- Properly inherits from BaseAgent
-- Implements all required methods
-- Can be instantiated without arguments
-- Returns valid actions (integers 0-8) when given observations
-
-### 📝 Official Submission Link
-
-<div align="center">
-<h3>⭐ SUBMIT YOUR AGENT HERE ⭐</h3>
-<h2><a href="https://forms.gle/nZCXLW5auGD56s8YA">https://forms.gle/nZCXLW5auGD56s8YA</a></h2>
-<p>After validating your agent, submit the associated python file through this link</p>
-</div>
-
-**Note**: Uploading the challenge to the Codabench platform is currently in progress. A submission link will be promptly provided that will allow automatic evaluation of agents and circumvent the need for manual submission via Google Form.
-
-**Leaderboard**: The leaderboard will be updated regularly during the upcoming two weeks to track progress on the static headwind challenge.
-
-## Phase 2: Full Reinforcement Learning Challenge (After October)
-
-After the first phase, we will move forward to **train** agents on several training initial windfields and evaluate them on both these windfields and a hidden test initial windfield. This represents the ultimate challenge of reinforcement learning: being able to generalize to an environment with common dynamics but which was not exactly seen during the learning phase.
-
-This second phase will be the main focus of the challenge after the second phase of the bootcamp, where we dive deeper into advanced reinforcement learning techniques.
-
-<!-- ### Grading Criteria
-
-Your submission will be evaluated based on:
-
-1. **Agent Validity (Pass/Fail)**: Your agent must pass validation checks
-2. **Training Initial Windfield Performance**: Performance across the three training initial windfields
-3. **Test Initial Windfield Performance**: Performance on the hidden test initial windfield
-
-The final grade will be calculated based on a weighted combination of these factors.
--->
-
-### Challenge Timeline
+## Challenge Timeline
 
 **Phase 1 (Current - Until End of October)**:
 - **Focus**: Static headwind challenge only
@@ -216,19 +179,10 @@ The final grade will be calculated based on a weighted combination of these fact
 - **Duration**: Until Friday, December 12th
 - **Leaderboard Updates**: Every Monday (showing performance on the test initial windfield)
 
-This two-phase approach allows challengers to master basic sailing physics before tackling the full RL challenge with dynamic wind conditions and generalization requirements.
+## Communication
 
-### Communication
-
-Please use the #rl-bootcamp-2025 chan to ask your questions and discuss any challenge-related topics
-
-<!-- There will be two dedicated threads in the class Slack for this challenge:
-- **General Channel #rl-challenge**: For questions related to the challenge (we encourage challengers to help each other by answering questions when possible). The evaluator will dedicate ~2-3h/week to address unanswered questions and provide clarification.
-- **Leaderboard Channel #rl-leaderboards**: Weekly updates on agent performance on the test initial windfield (in the form of a leaderboard)
--->
+Please use the #rl-bootcamp-2025 chan to ask your questions and discuss any challenge-related topics.
 
 ## Good Luck!
 
 Start by mastering the **Static Headwind** scenario to understand the basics of sailing physics and agent navigation. Once you can successfully navigate against a static headwind using an appropriate strategy, you'll be ready to tackle the full challenge with dynamic wind conditions!
-
-By the time you complete the design_agent notebook, you should have a good understanding of how to create an effective sailing agent that can handle both simple static conditions and complex dynamic wind patterns.
