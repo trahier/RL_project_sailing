@@ -34,8 +34,8 @@ def visualize_race(race_results: List[Dict[str, Any]],
     env = SailingEnv(
         wind_init_params=initial_windfield['wind_init_params'],
         wind_evol_params=initial_windfield['wind_evol_params'],
-        wind_grid_density=25,
-        wind_arrow_scale=80
+        wind_grid_density=32,  # Show all 32x32 arrows
+        wind_arrow_scale=120  # Higher scale = shorter arrows
     )
     env.seed(seed)
     env.reset(seed=seed)
@@ -63,13 +63,13 @@ def visualize_race(race_results: List[Dict[str, Any]],
             env.step(0)  # Dummy step to evolve wind
         
         # Plot wind field
-        step_size = max(1, env.grid_size[0] // 25)
+        step_size = max(1, env.grid_size[0] // env.wind_grid_density)
         x = np.arange(0, env.grid_size[0], step_size)
         y = np.arange(0, env.grid_size[1], step_size)
         X, Y = np.meshgrid(x, y)
         U = env.wind_field[::step_size, ::step_size, 0]
         V = env.wind_field[::step_size, ::step_size, 1]
-        ax.quiver(X, Y, U, V, color='white', alpha=0.4, scale=80)
+        ax.quiver(X, Y, U, V, color='white', alpha=0.4, scale=120)
         
         # Draw goal
         goal_outer = Circle((env.goal_position[0], env.goal_position[1]), 1.5, 
@@ -268,8 +268,8 @@ def create_race_gif(race_results: List[Dict[str, Any]],
     env = SailingEnv(
         wind_init_params=initial_windfield['wind_init_params'],
         wind_evol_params=initial_windfield['wind_evol_params'],
-        wind_grid_density=25,
-        wind_arrow_scale=80
+        wind_grid_density=32,  # Show all 32x32 arrows
+        wind_arrow_scale=120  # Higher scale = shorter arrows
     )
     env.seed(seed)
     env.reset(seed=seed)
@@ -301,13 +301,13 @@ def create_race_gif(race_results: List[Dict[str, Any]],
             env.step(0)  # Dummy step to evolve wind
         
         # Plot wind field
-        step_size = max(1, env.grid_size[0] // 25)
+        step_size = max(1, env.grid_size[0] // env.wind_grid_density)
         x = np.arange(0, env.grid_size[0], step_size)
         y = np.arange(0, env.grid_size[1], step_size)
         X, Y = np.meshgrid(x, y)
         U = env.wind_field[::step_size, ::step_size, 0]
         V = env.wind_field[::step_size, ::step_size, 1]
-        ax.quiver(X, Y, U, V, color='white', alpha=0.4, scale=80)
+        ax.quiver(X, Y, U, V, color='white', alpha=0.4, scale=120)
         
         # Draw goal
         goal_outer = Circle((env.goal_position[0], env.goal_position[1]), 1.5, 
