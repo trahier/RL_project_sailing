@@ -18,7 +18,8 @@ from PIL import Image
 def visualize_race(race_results: List[Dict[str, Any]], 
                    windfield_name: str, 
                    seed: int, 
-                   max_steps: int) -> None:
+                   max_steps: int,
+                   show_full_trajectories: bool = False) -> None:
     """
     Visualize multiple agents racing on the same windfield with an interactive slider.
     
@@ -28,6 +29,7 @@ def visualize_race(race_results: List[Dict[str, Any]],
         windfield_name: Name of the windfield to visualize
         seed: Seed used for the race
         max_steps: Maximum number of steps for the race
+        show_full_trajectories: If True, show full trajectory for each agent (default: False)
     """
     # Create environment to get windfield
     initial_windfield = get_initial_windfield(windfield_name)
@@ -113,14 +115,26 @@ def visualize_race(race_results: List[Dict[str, Any]],
                                       edgecolor='black', linewidth=2)
                 ax.add_patch(boat_polygon)
                 
-                # Draw trajectory trail (fading)
+                # Draw trajectory trail
                 if step > 0:
-                    trail_length = min(10, step)
-                    trail_positions = result['positions'][max(0, step-trail_length):step+1]
-                    trail_x = [p[0] for p in trail_positions]
-                    trail_y = [p[1] for p in trail_positions]
-                    ax.plot(trail_x, trail_y, color=result['color'], alpha=0.3, 
-                           linewidth=2, linestyle='--')
+                    if show_full_trajectories:
+                        # Show full trajectory up to current step
+                        trail_positions = result['positions'][:step+1]
+                        trail_x = [p[0] for p in trail_positions]
+                        trail_y = [p[1] for p in trail_positions]
+                        # Draw with gradient (older = more transparent)
+                        for i in range(len(trail_x) - 1):
+                            alpha = 0.15 + 0.25 * (i / len(trail_x))
+                            ax.plot(trail_x[i:i+2], trail_y[i:i+2], 
+                                   color=result['color'], alpha=alpha, linewidth=5)
+                    else:
+                        # Show only last 10 steps (original behavior)
+                        trail_length = min(10, step)
+                        trail_positions = result['positions'][max(0, step-trail_length):step+1]
+                        trail_x = [p[0] for p in trail_positions]
+                        trail_y = [p[1] for p in trail_positions]
+                        ax.plot(trail_x, trail_y, color=result['color'], alpha=0.3, 
+                               linewidth=5, linestyle='--')
                 
                 # Add to legend
                 legend_elements.append(
@@ -132,6 +146,16 @@ def visualize_race(race_results: List[Dict[str, Any]],
             else:
                 # Agent has finished - show at final position
                 final_pos = result['positions'][-1]
+                
+                # Draw full trajectory for finished agent (if enabled)
+                if show_full_trajectories and len(result['positions']) > 1:
+                    trail_x = [p[0] for p in result['positions']]
+                    trail_y = [p[1] for p in result['positions']]
+                    # Draw with gradient (older = more transparent)
+                    for i in range(len(trail_x) - 1):
+                        alpha = 0.15 + 0.25 * (i / len(trail_x))
+                        ax.plot(trail_x[i:i+2], trail_y[i:i+2], 
+                               color=result['color'], alpha=alpha, linewidth=5)
                 
                 # Draw a marker at final position
                 if result['success']:
@@ -238,7 +262,8 @@ def create_race_gif(race_results: List[Dict[str, Any]],
                     output_path: str,
                     fps: int = 10,
                     step_interval: int = 1,
-                    figsize: tuple = (10, 10)) -> None:
+                    figsize: tuple = (10, 10),
+                    show_full_trajectories: bool = False) -> None:
     """
     Create a GIF animation of a race between multiple agents.
     
@@ -250,6 +275,7 @@ def create_race_gif(race_results: List[Dict[str, Any]],
         fps: Frames per second for the GIF (default: 10)
         step_interval: Interval between frames (1 = every step, 2 = every other step, etc.)
         figsize: Size of the figure (default: (10, 10))
+        show_full_trajectories: If True, show full trajectory for each agent (default: False)
     
     Example:
         >>> create_race_gif(race_results, "static_headwind", 42, "my_race.gif", fps=15)
@@ -351,12 +377,24 @@ def create_race_gif(race_results: List[Dict[str, Any]],
                 
                 # Draw trail
                 if step > 0:
-                    trail_length = min(10, step)
-                    trail_positions = result['positions'][max(0, step-trail_length):step+1]
-                    trail_x = [p[0] for p in trail_positions]
-                    trail_y = [p[1] for p in trail_positions]
-                    ax.plot(trail_x, trail_y, color=result['color'], alpha=0.3, 
-                           linewidth=2, linestyle='--')
+                    if show_full_trajectories:
+                        # Show full trajectory up to current step
+                        trail_positions = result['positions'][:step+1]
+                        trail_x = [p[0] for p in trail_positions]
+                        trail_y = [p[1] for p in trail_positions]
+                        # Draw with gradient (older = more transparent)
+                        for i in range(len(trail_x) - 1):
+                            alpha = 0.15 + 0.25 * (i / len(trail_x))
+                            ax.plot(trail_x[i:i+2], trail_y[i:i+2], 
+                                   color=result['color'], alpha=alpha, linewidth=5)
+                    else:
+                        # Show only last 10 steps (original behavior)
+                        trail_length = min(10, step)
+                        trail_positions = result['positions'][max(0, step-trail_length):step+1]
+                        trail_x = [p[0] for p in trail_positions]
+                        trail_y = [p[1] for p in trail_positions]
+                        ax.plot(trail_x, trail_y, color=result['color'], alpha=0.3, 
+                               linewidth=5, linestyle='--')
                 
                 legend_elements.append(
                     plt.Line2D([0], [0], marker='^', color='w', 
@@ -366,6 +404,17 @@ def create_race_gif(race_results: List[Dict[str, Any]],
                 )
             else:
                 final_pos = result['positions'][-1]
+                
+                # Draw full trajectory for finished agent (if enabled)
+                if show_full_trajectories and len(result['positions']) > 1:
+                    trail_x = [p[0] for p in result['positions']]
+                    trail_y = [p[1] for p in result['positions']]
+                    # Draw with gradient (older = more transparent)
+                    for i in range(len(trail_x) - 1):
+                        alpha = 0.15 + 0.25 * (i / len(trail_x))
+                        ax.plot(trail_x[i:i+2], trail_y[i:i+2], 
+                               color=result['color'], alpha=alpha, linewidth=5)
+                
                 if result['success']:
                     ax.scatter(final_pos[0], final_pos[1], s=250, marker='*', 
                               color=result['color'], edgecolors='gold', linewidths=2.5,

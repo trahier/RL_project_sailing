@@ -48,7 +48,8 @@ class SailingEnv(gym.Env): # type: ignore
                  boat_performance=0.4,
                  max_speed=2.0,
                  inertia_factor=0.3,
-                 reward_discount_factor=0.99):
+                 reward_discount_factor=0.99,
+                 show_full_trajectory=False):
         """
         Initialize the sailing environment.
         
@@ -64,6 +65,7 @@ class SailingEnv(gym.Env): # type: ignore
             max_speed: Maximum boat speed
             inertia_factor: How much velocity is preserved (0-1)
             reward_discount_factor: Discount factor for future rewards
+            show_full_trajectory: If True, render will show the full trajectory trace (default: False)
         """
         super().__init__()
         
@@ -79,6 +81,7 @@ class SailingEnv(gym.Env): # type: ignore
         self.max_speed = max_speed
         self.inertia_factor = inertia_factor
         self.reward_discount_factor = reward_discount_factor
+        self.show_full_trajectory = show_full_trajectory
         
         # If static_wind is True, override the wind_change_prob to 0
         if self.static_wind:
@@ -92,6 +95,9 @@ class SailingEnv(gym.Env): # type: ignore
         self.velocity = np.array([0.0, 0.0])
         self.position_accumulator = np.array([0.0, 0.0])  # Initialize position accumulator
         self.goal_position = np.array([grid_size[0] // 2, grid_size[1] - 1])  # Goal at top center
+        
+        # Initialize position history for trajectory visualization
+        self.position_history = [self.position.copy()]
         
         # Initialize step count
         self.step_count = 0
@@ -137,6 +143,9 @@ class SailingEnv(gym.Env): # type: ignore
         # Reset step count and last action
         self.step_count = 0
         self.last_action = None
+        
+        # Reset position history for trajectory visualization
+        self.position_history = [self.position.copy()]
         
         # Generate new wind field
         self.wind_field = self._generate_wind_field()
@@ -218,6 +227,9 @@ class SailingEnv(gym.Env): # type: ignore
         # Update position
         self.position = new_position
         
+        # Update position history for trajectory visualization
+        self.position_history.append(self.position.copy())
+        
         # Check if reached goal (within 1 cell)
         distance_to_goal = np.linalg.norm(self.position - self.goal_position)
         reached_goal = distance_to_goal < 1.5
@@ -293,6 +305,26 @@ class SailingEnv(gym.Env): # type: ignore
         
         # Plot wind vectors with specified scale
         wind_arrows = ax.quiver(X, Y, U, V, color='white', alpha=0.6, scale=self.wind_arrow_scale)
+        
+        # Draw trajectory trace if enabled
+        if self.show_full_trajectory and len(self.position_history) > 1:
+            # Extract x and y coordinates from position history
+            trajectory_x = [pos[0] for pos in self.position_history]
+            trajectory_y = [pos[1] for pos in self.position_history]
+            
+            # Plot the full trajectory as a line with gradient (fading older positions)
+            for i in range(len(trajectory_x) - 1):
+                # Calculate alpha based on position in trajectory (older = more transparent)
+                alpha = 0.3 + 0.5 * (i / len(trajectory_x))
+                ax.plot(trajectory_x[i:i+2], trajectory_y[i:i+2], 
+                       color='yellow', linewidth=2, alpha=alpha, zorder=5)
+            
+            # Add markers at regular intervals along the trajectory
+            marker_interval = max(1, len(self.position_history) // 10)
+            for i in range(0, len(trajectory_x), marker_interval):
+                if i < len(trajectory_x) - 1:  # Don't mark the current position
+                    ax.scatter(trajectory_x[i], trajectory_y[i], 
+                             s=30, color='yellow', alpha=0.6, zorder=6, edgecolors='orange')
         
         # Draw the boat as a triangle (sailboat from above)
         boat_direction = self.velocity
@@ -373,6 +405,13 @@ class SailingEnv(gym.Env): # type: ignore
             legend_elements.append(
                 plt.Line2D([0], [0], color='yellow', marker='>', linestyle='',
                           label='Boat Velocity', markersize=10)
+            )
+        
+        # Add trajectory trace to legend if enabled
+        if self.show_full_trajectory and len(self.position_history) > 1:
+            legend_elements.append(
+                plt.Line2D([0], [0], color='yellow', linewidth=2,
+                          label='Trajectory', markersize=10)
             )
         
         # Add the legend
