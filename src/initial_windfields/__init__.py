@@ -29,8 +29,8 @@ TRAINING_INITIAL_WINDFIELD_1 = {
     'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
 }
 
-# Training Initial Windfield 2: North-Northeast Wind
-# Characteristics: Starting with NNE wind
+# Training Initial Windfield 2: South-Southwest Wind
+# Characteristics: Starting with SSW wind
 TRAINING_INITIAL_WINDFIELD_2 = {
     'wind_init_params': {
         'base_speed': 3.0,
@@ -44,8 +44,8 @@ TRAINING_INITIAL_WINDFIELD_2 = {
     'wind_evol_params': COMMON_WIND_EVOL_PARAMS.copy()
 }
 
-# Training Initial Windfield 3: Pure North Wind
-# Characteristics: Starting with N wind, smaller pattern scale
+# Training Initial Windfield 3: North-Northeast Wind
+# Characteristics: Starting with NNE wind, smaller pattern scale
 TRAINING_INITIAL_WINDFIELD_3 = {
     'wind_init_params': {
         'base_speed': 3.0,
