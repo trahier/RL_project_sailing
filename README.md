@@ -1,4 +1,4 @@
-# SAILING CHALLENGE
+# REINFORCEMENT LEARNING SAILING CHALLENGE
 
 ![Sailing Environment](illustration_challenge.png)
 
