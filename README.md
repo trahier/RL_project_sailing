@@ -78,7 +78,7 @@ We recommend exploring the notebooks in the following order:
    Test that your agent implementation meets the required interface.
 
 4. **evaluate_agent.ipynb**  
-   Evaluate your agent's performance across different initial windfields.
+   Evaluate your agent's performance across different wind scenarios.
 
 5. **vizualise_agent.ipynb**
    This last notebook is useful to visualize the agents behaviour and therefore to have intuition on what might be the potential areas of improvement.
