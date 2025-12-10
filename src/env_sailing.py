@@ -430,11 +430,21 @@ class SailingEnv(gym.Env): # type: ignore
         # Convert plot to image
         fig.tight_layout()
         fig.canvas.draw()
-        img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-        # Calculate actual dimensions from buffer size
-        total_pixels = len(img) // 3
-        side_length = int(np.sqrt(total_pixels))
-        img = img.reshape((side_length, side_length, 3))
+        
+        # Get image from canvas - compatible with both old and new matplotlib versions
+        # tostring_rgb() was deprecated in matplotlib 3.8 and removed in 3.9+
+        try:
+            # New method (matplotlib >= 3.8)
+            img = np.asarray(fig.canvas.buffer_rgba())
+            # Convert RGBA to RGB
+            img = img[:, :, :3]
+        except AttributeError:
+            # Old method (matplotlib < 3.8)
+            img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+            # Calculate actual dimensions from buffer size
+            total_pixels = len(img) // 3
+            side_length = int(np.sqrt(total_pixels))
+            img = img.reshape((side_length, side_length, 3))
         
         plt.close(fig)
         
