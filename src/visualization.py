@@ -10,7 +10,7 @@ from matplotlib.patches import Polygon, Circle
 from typing import Dict, Any, List, Optional
 from ipywidgets import interact, IntSlider
 from env_sailing import SailingEnv
-from initial_windfields import get_initial_windfield
+from wind_scenarios import get_wind_scenario
 import io
 from PIL import Image
 
@@ -32,10 +32,10 @@ def visualize_race(race_results: List[Dict[str, Any]],
         show_full_trajectories: If True, show full trajectory for each agent (default: False)
     """
     # Create environment to get windfield
-    initial_windfield = get_initial_windfield(windfield_name)
+    wind_scenario = get_wind_scenario(windfield_name)
     env = SailingEnv(
-        wind_init_params=initial_windfield['wind_init_params'],
-        wind_evol_params=initial_windfield['wind_evol_params'],
+        wind_init_params=wind_scenario['wind_init_params'],
+        wind_evol_params=wind_scenario['wind_evol_params'],
         wind_grid_density=32,  # Show all 32x32 arrows
         wind_arrow_scale=120  # Higher scale = shorter arrows
     )
@@ -290,10 +290,10 @@ def create_race_gif(race_results: List[Dict[str, Any]],
     print(f"🎬 Creating race GIF...")
     
     # Create environment to get windfield
-    initial_windfield = get_initial_windfield(windfield_name)
+    wind_scenario = get_wind_scenario(windfield_name)
     env = SailingEnv(
-        wind_init_params=initial_windfield['wind_init_params'],
-        wind_evol_params=initial_windfield['wind_evol_params'],
+        wind_init_params=wind_scenario['wind_init_params'],
+        wind_evol_params=wind_scenario['wind_evol_params'],
         wind_grid_density=32,  # Show all 32x32 arrows
         wind_arrow_scale=120  # Higher scale = shorter arrows
     )

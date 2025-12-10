@@ -47,16 +47,16 @@ except ImportError:
         print("Make sure you're running this script from the repository root or src directory.")
         sys.exit(1)
 
-# Try different approaches to import initial_windfields
+# Try different approaches to import wind_scenarios
 try:
     # Direct import from the package
-    from initial_windfields import get_initial_windfield
+    from wind_scenarios import get_wind_scenario
 except ImportError:
     # Relative import in case the script is run from the src directory
     try:
-        from initial_windfields import get_initial_windfield
+        from wind_scenarios import get_wind_scenario
     except ImportError:
-        print(f"{RED}Error: Unable to import initial_windfields module.{RESET}")
+        print(f"{RED}Error: Unable to import wind_scenarios module.{RESET}")
         print("Make sure you're running this script from the repository root or src directory.")
         sys.exit(1)
 

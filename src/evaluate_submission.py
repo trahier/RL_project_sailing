@@ -2,7 +2,7 @@
 """
 Sailing Challenge - Agent Evaluation Script
 
-This script evaluates a sailing agent on specified initial windfields and reports performance metrics.
+This script evaluates a sailing agent on specified wind scenarios and reports performance metrics.
 """
 
 import argparse
@@ -21,29 +21,29 @@ from agents.base_agent import BaseAgent
 # Import evaluation functions
 from evaluation import evaluate_agent
 
-# Import initial windfields with proper path handling
+# Import wind scenarios with proper path handling
 try:
-    from initial_windfields import get_initial_windfield, INITIAL_WINDFIELDS
-    # Try to import test initial windfield if available (for evaluators only)
+    from wind_scenarios import get_wind_scenario, WIND_SCENARIOS
+    # Try to import test wind scenario if available (for evaluators only)
     try:
-        from initial_windfields.private_initial_windfields import TEST_INITIAL_WINDFIELD
-        HAS_TEST_INITIAL_WINDFIELD = True
+        from wind_scenarios.private_wind_scenarios import TEST_WIND_SCENARIO
+        HAS_TEST_WIND_SCENARIO = True
     except ImportError:
-        HAS_TEST_INITIAL_WINDFIELD = False
-        TEST_INITIAL_WINDFIELD = None
+        HAS_TEST_WIND_SCENARIO = False
+        TEST_WIND_SCENARIO = None
 except ImportError:
     # If we're running from the src directory
-    from initial_windfields import get_initial_windfield, INITIAL_WINDFIELDS
+    from wind_scenarios import get_wind_scenario, WIND_SCENARIOS
     try:
-        from initial_windfields.private_initial_windfields import TEST_INITIAL_WINDFIELD
-        HAS_TEST_INITIAL_WINDFIELD = True
+        from wind_scenarios.private_wind_scenarios import TEST_WIND_SCENARIO
+        HAS_TEST_WIND_SCENARIO = True
     except ImportError:
-        HAS_TEST_INITIAL_WINDFIELD = False
-        TEST_INITIAL_WINDFIELD = None
+        HAS_TEST_WIND_SCENARIO = False
+        TEST_WIND_SCENARIO = None
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Evaluate a sailing agent on specified initial windfields.")
+    parser = argparse.ArgumentParser(description="Evaluate a sailing agent on specified wind scenarios.")
     
     parser.add_argument(
         "agent_file",
@@ -51,9 +51,9 @@ def parse_args():
     )
     
     parser.add_argument(
-        "--initial_windfield",
-        choices=[*INITIAL_WINDFIELDS.keys(), "test"],
-        help="Name of initial windfield to evaluate on (default: all training initial windfields)"
+        "--wind_scenario",
+        choices=[*WIND_SCENARIOS.keys(), "test"],
+        help="Name of wind scenario to evaluate on (default: all training wind scenarios)"
     )
     
     parser.add_argument(
@@ -85,7 +85,7 @@ def parse_args():
     parser.add_argument(
         "--include-test",
         action="store_true",
-        help="Include the hidden test initial windfield (evaluator use only)"
+        help="Include the hidden test wind scenario (evaluator use only)"
     )
     
     return parser.parse_args()
@@ -123,24 +123,24 @@ def load_agent_from_file(file_path: str) -> BaseAgent:
     
     return agent
 
-def print_results(initial_windfield_name: str, results: Dict[str, Any], is_test: bool = False, verbose: bool = False):
+def print_results(wind_scenario_name: str, results: Dict[str, Any], is_test: bool = False, verbose: bool = False):
     """Print the evaluation results in a readable format."""
     if verbose:
         # Print detailed results
-        print(f"\nResults for initial windfield: {initial_windfield_name}" + (" (HIDDEN TEST)" if is_test else ""), flush=True)
+        print(f"\nResults for wind scenario: {wind_scenario_name}" + (" (HIDDEN TEST)" if is_test else ""), flush=True)
         print(f"Success rate: {results['success_rate']:.2%}", flush=True)
         print(f"Discounted rewards mean: {results['mean_reward']:.2f} ± {results['std_reward']:.2f}", flush=True)
         print(f"Step count mean: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}", flush=True)
         
-        # Show more details for test initial windfield
+        # Show more details for test wind scenario
         if is_test and 'individual_results' in results:
             print("\nIndividual results for test:", flush=True)
             for i, res in enumerate(results['individual_results']):
                 print(f"Seed {res['seed']}: Reward = {res['discounted_reward']:.2f}, Steps = {res['steps']}, Success = {res['success']}", flush=True)
     else:
         # Print simple results
-        initial_windfield_label = f"{initial_windfield_name}" + (" (TEST)" if is_test else "")
-        print(f"{initial_windfield_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}", flush=True)
+        wind_scenario_label = f"{wind_scenario_name}" + (" (TEST)" if is_test else "")
+        print(f"{wind_scenario_label:12} | Success: {results['success_rate']:.2%} | Reward: {results['mean_reward']:.2f} ± {results['std_reward']:.2f} | Steps: {results['mean_steps']:.1f} ± {results['std_steps']:.1f}", flush=True)
 
 def weighted_score(training_results: Dict[str, float], test_result: Dict[str, float], weights: Tuple[float, float] = (0.5, 0.5)):
     """Calculate weighted score between training and test results."""
@@ -171,28 +171,28 @@ def main():
         # Generate seeds for evaluation
         seeds = list(range(args.seeds, args.seeds + args.num_seeds))
         
-        # Determine which initial windfields to evaluate on
-        if args.initial_windfield:
-            # Special handling for test initial windfield
-            if args.initial_windfield.lower() == "test":
-                if not HAS_TEST_INITIAL_WINDFIELD:
-                    print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.", flush=True)
+        # Determine which wind scenarios to evaluate on
+        if args.wind_scenario:
+            # Special handling for test wind scenario
+            if args.wind_scenario.lower() == "test":
+                if not HAS_TEST_WIND_SCENARIO:
+                    print("❌ Error: Test wind scenario is not available. This feature is for evaluators only.", flush=True)
                     return
-                initial_windfield_names = ["test"]
+                wind_scenario_names = ["test"]
             else:
-                # Single specified initial windfield
-                initial_windfield_names = [args.initial_windfield]
+                # Single specified wind scenario
+                wind_scenario_names = [args.wind_scenario]
         else:
-            # All training initial windfields by default
-            initial_windfield_names = [name for name in INITIAL_WINDFIELDS.keys() if name.startswith("training_")]
+            # All training wind scenarios by default
+            wind_scenario_names = [name for name in WIND_SCENARIOS.keys() if name.startswith("training_")]
             
-        # Add test initial windfield if requested via --include-test
+        # Add test wind scenario if requested via --include-test
         if args.include_test:
-            if not HAS_TEST_INITIAL_WINDFIELD:
-                print("❌ Error: Test initial windfield is not available. This feature is for evaluators only.", flush=True)
+            if not HAS_TEST_WIND_SCENARIO:
+                print("❌ Error: Test wind scenario is not available. This feature is for evaluators only.", flush=True)
                 return
-            if "test" not in initial_windfield_names:
-                initial_windfield_names.append("test")
+            if "test" not in wind_scenario_names:
+                wind_scenario_names.append("test")
         
         # Basic statistical info about the evaluation
         np.set_printoptions(precision=2)
@@ -205,16 +205,16 @@ def main():
             'full_trajectory': False
         }
         
-        # Store results for all initial windfields
+        # Store results for all wind scenarios
         all_results = {}
         
         # Print evaluation parameters
-        print(f"\nEvaluating on {len(initial_windfield_names)} initial windfields with {len(seeds)} seeds", flush=True)
+        print(f"\nEvaluating on {len(wind_scenario_names)} wind scenarios with {len(seeds)} seeds", flush=True)
         print(f"Agent: {type(agent).__name__}", flush=True)
         print(f"Maximum steps per episode: {eval_params['max_horizon']}", flush=True)
         
         # Print table header
-        print("\nINITIAL_WINDFIELD     | SUCCESS RATE | MEAN REWARD       | MEAN STEPS", flush=True)
+        print("\nWIND_SCENARIO    | SUCCESS RATE | MEAN REWARD       | MEAN STEPS", flush=True)
         print("-" * 75, flush=True)
         
         # Custom callback for seed-by-seed progress reporting
@@ -229,23 +229,23 @@ def main():
         else:
             print_seed_info = args.verbose
         
-        # Evaluate on each initial windfield
-        for initial_windfield_name in initial_windfield_names:
+        # Evaluate on each wind scenario
+        for wind_scenario_name in wind_scenario_names:
             try:
-                # Get the initial windfield
-                if initial_windfield_name.lower() == "test":
-                    if not HAS_TEST_INITIAL_WINDFIELD:
-                        raise ValueError("Test initial windfield is not available")
-                    initial_windfield = TEST_INITIAL_WINDFIELD.copy()
+                # Get the wind scenario
+                if wind_scenario_name.lower() == "test":
+                    if not HAS_TEST_WIND_SCENARIO:
+                        raise ValueError("Test wind scenario is not available")
+                    wind_scenario = TEST_WIND_SCENARIO.copy()
                     is_test = True
                 else:
-                    initial_windfield = get_initial_windfield(initial_windfield_name)
+                    wind_scenario = get_wind_scenario(wind_scenario_name)
                     is_test = False
                 
                 # Add render mode to environment parameters if not specified
-                initial_windfield.update({
+                wind_scenario.update({
                     'env_params': {
-                        **initial_windfield.get('env_params', {}),
+                        **wind_scenario.get('env_params', {}),
                         'render_mode': None
                     }
                 })
@@ -253,20 +253,20 @@ def main():
                 # Run evaluation
                 results = evaluate_agent(
                     agent=agent,
-                    initial_windfield=initial_windfield,
+                    wind_scenario=wind_scenario,
                     seeds=seeds,
                     seed_callback=seed_callback if print_seed_info else None,
                     **eval_params
                 )
                 
                 # Store results
-                all_results[initial_windfield_name] = results
+                all_results[wind_scenario_name] = results
                 
                 # Print results
-                print_results(initial_windfield_name, results, is_test, args.verbose)
+                print_results(wind_scenario_name, results, is_test, args.verbose)
                 
             except Exception as e:
-                print(f"❌ Error evaluating on initial windfield {initial_windfield_name}: {str(e)}", flush=True)
+                print(f"❌ Error evaluating on wind scenario {wind_scenario_name}: {str(e)}", flush=True)
                 if args.verbose:
                     import traceback
                     traceback.print_exc()
@@ -275,30 +275,30 @@ def main():
         
         # Calculate combined statistics
         if len(all_results) > 0:
-            # Calculate means across all initial windfields
+            # Calculate means across all wind scenarios
             success_rates = np.array([r['success_rate'] for r in all_results.values()])
             rewards = np.array([r['mean_reward'] for r in all_results.values()])
             steps = np.array([r['mean_steps'] for r in all_results.values()])
             
-            # Calculate standard deviations of the means across initial windfields
+            # Calculate standard deviations of the means across wind scenarios
             success_std_of_means = np.std(success_rates) if len(success_rates) > 1 else 0
             reward_std_of_means = np.std(rewards) if len(rewards) > 1 else 0
             steps_std_of_means = np.std(steps) if len(steps) > 1 else 0
             
-            # When there's only one initial windfield evaluated
+            # When there's only one wind scenario evaluated
             if len(all_results) == 1:
-                # For single initial windfield, use the initial windfield's own standard deviation
-                initial_windfield = list(all_results.values())[0]
-                reward_std_of_means = initial_windfield['std_reward']
-                success_std_of_means = 0  # Success rate doesn't have a std in initial windfield results
-                steps_std_of_means = initial_windfield['std_steps']
+                # For single wind scenario, use the wind scenario's own standard deviation
+                wind_scenario = list(all_results.values())[0]
+                reward_std_of_means = wind_scenario['std_reward']
+                success_std_of_means = 0  # Success rate doesn't have a std in wind scenario results
+                steps_std_of_means = wind_scenario['std_steps']
             
             # Print overall results
             print(f"OVERALL      | Success: {np.mean(success_rates):.2%} ± {success_std_of_means:.2%}", flush=True)
             print(f"Reward: {np.mean(rewards):.2f} ± {reward_std_of_means:.2f}", flush=True)
             print(f"Steps: {np.mean(steps):.1f} ± {steps_std_of_means:.1f}", flush=True)
             
-            # If test initial windfield was included, calculate a weighted score (50% test, 50% training)
+            # If test wind scenario was included, calculate a weighted score (50% test, 50% training)
             if 'test' in all_results and len(all_results) > 1:
                 test_results = all_results['test']
                 
@@ -306,7 +306,7 @@ def main():
                 training_success = np.mean([r['success_rate'] for name, r in all_results.items() if name != 'test'])
                 training_reward = np.mean([r['mean_reward'] for name, r in all_results.items() if name != 'test'])
                 
-                print("\nTEST INITIAL WINDFIELD PERFORMANCE:", flush=True)
+                print("\nTEST WIND SCENARIO PERFORMANCE:", flush=True)
                 print(f"Training success rate: {training_success:.2%}", flush=True)
                 print(f"Test: {test_results['success_rate']:.2%}", flush=True)
                 print(f"Training avg reward: {training_reward:.2f}", flush=True)

@@ -90,7 +90,8 @@ Submissions must be made through the codabench platform. The private link to the
 
 To submit an agent to this challenge, upload a **ZIP file** whose root directory contains at least one `.py` file defining a class called `MyAgent`.
 
-Your main file must start with this import and class declaration:
+Your main file must start with this import and class declaration. IMPORTANT: the import is different from the agent you will have locally validated/evaluated/vizualised: locally we import `from agents.base_agent import BaseAgent` but the agent .py file to be submitted to codabench must import `from evaluator.base_agent import BaseAgent`.
+
 ```python
 from evaluator.base_agent import BaseAgent
 
@@ -114,6 +115,13 @@ Before submitting, validate your agent:
 ```bash
 cd src
 python test_agent_validity.py path/to/your/agent.py
+```
+
+you can also evaluate it against one or several of the three training wind scenarios:
+
+```bash
+cd src
+python3 evaluate_submission.py path/to/your/agent.py --wind_scenario training_1 --seeds 1 --num-seeds 100 --verbose
 ```
 
 

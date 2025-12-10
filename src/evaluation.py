@@ -19,7 +19,7 @@ from tqdm.notebook import tqdm # type: ignore
 
 def evaluate_agent(
     agent: BaseAgent,
-    initial_windfield: Dict[str, Dict[str, Any]],
+    wind_scenario: Dict[str, Dict[str, Any]],
     seeds: Union[int, List[int]],
     max_horizon: int = 1000,
     verbose: bool = False,
@@ -27,11 +27,11 @@ def evaluate_agent(
     full_trajectory: bool = False,
     seed_callback: Optional[Callable[[int, Dict[str, Any]], None]] = None
 ) -> Dict[str, Any]:
-    """Evaluate an agent on a specific initial windfield with given seeds.
+    """Evaluate an agent on a specific wind scenario with given seeds.
     
     Args:
         agent: The agent to evaluate
-        initial_windfield: Dictionary containing environment parameters
+        wind_scenario: Dictionary containing environment parameters
         seeds: Either a single seed or a list of seeds
         max_horizon: Maximum number of steps per episode
         verbose: Whether to show progress bar
@@ -47,17 +47,17 @@ def evaluate_agent(
     if single_seed:
         seeds = [seeds]
     
-    # Create environment using initial windfield parameters
-    env_params = initial_windfield.get('env_params', {}).copy()  # Make a copy to avoid modifying the original
+    # Create environment using wind scenario parameters
+    env_params = wind_scenario.get('env_params', {}).copy()  # Make a copy to avoid modifying the original
     
     # Set render_mode only if not already provided in env_params
     if 'render_mode' not in env_params and render:
         env_params['render_mode'] = "rgb_array"
     
-    # Create the environment with all parameters - use deep copies of the initial windfield parameters
+    # Create the environment with all parameters - use deep copies of the wind scenario parameters
     env = SailingEnv(
-        wind_init_params=copy.deepcopy(initial_windfield['wind_init_params']),
-        wind_evol_params=copy.deepcopy(initial_windfield['wind_evol_params']),
+        wind_init_params=copy.deepcopy(wind_scenario['wind_init_params']),
+        wind_evol_params=copy.deepcopy(wind_scenario['wind_evol_params']),
         **env_params
     )
     
