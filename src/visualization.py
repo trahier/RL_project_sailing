@@ -111,7 +111,7 @@ def visualize_race(race_results: List[Dict[str, Any]],
                 starboard = stern_center + np.array([direction[1], -direction[0]]) * boat_width * 0.5
                 
                 boat_vertices = np.array([bow, port, stern_center, starboard])
-                boat_polygon = Polygon(boat_vertices, color=result['color'], alpha=0.9, 
+                boat_polygon = Polygon(boat_vertices, facecolor=result['color'], alpha=0.9, 
                                       edgecolor='black', linewidth=2)
                 ax.add_patch(boat_polygon)
                 
@@ -186,7 +186,7 @@ def visualize_race(race_results: List[Dict[str, Any]],
                     bbox=dict(facecolor=ocean_color, alpha=0.8, boxstyle='round,pad=0.5'))
         
         # Add race info box
-        info_lines = [f"🏁 Race Step: {step}"]
+        info_lines = [f"Race Step: {step}"]
         for result in race_results:
             if step < len(result['positions']):
                 pos = result['positions'][step]
@@ -382,7 +382,7 @@ def create_race_gif(race_results: List[Dict[str, Any]],
                 starboard = stern_center + np.array([direction[1], -direction[0]]) * boat_width * 0.5
                 
                 boat_vertices = np.array([bow, port, stern_center, starboard])
-                boat_polygon = Polygon(boat_vertices, color=result['color'], alpha=0.9, 
+                boat_polygon = Polygon(boat_vertices, facecolor=result['color'], alpha=0.9, 
                                       edgecolor='black', linewidth=2)
                 ax.add_patch(boat_polygon)
                 
