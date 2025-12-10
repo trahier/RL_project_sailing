@@ -195,16 +195,29 @@ def visualize_trajectory(
             plt.title(f'Step {frame_idx}')
             plt.show()
         
-        interact(
-            show_frame,
-            frame_idx=IntSlider(
-                min=0,
-                max=len(frames)-1,
-                step=1,
-                value=0,
-                description='Step:'
+        # Try to create interactive slider with fallback
+        try:
+            widget = interact(
+                show_frame,
+                frame_idx=IntSlider(
+                    min=0,
+                    max=len(frames)-1,
+                    step=1,
+                    value=0,
+                    description='Step:'
+                )
             )
-        )
+            # Check if widget was created successfully
+            if widget is None:
+                raise RuntimeError("Widget not displayed")
+        except Exception as e:
+            print(f"⚠️ Interactive slider not available ({type(e).__name__}). Showing static frames instead.")
+            print("Tip: Run 'pip install jupyterlab-widgets' for JupyterLab or check README troubleshooting section.")
+            # Show first, middle, and last frames as fallback
+            n_frames = len(frames)
+            for idx in [0, n_frames // 2, n_frames - 1]:
+                print(f"\n--- Step {idx} ---")
+                show_frame(idx)
     else:
         # Show first and last frame side by side
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))

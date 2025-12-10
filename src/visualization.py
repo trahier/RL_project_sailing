@@ -206,17 +206,28 @@ def visualize_race(race_results: List[Dict[str, Any]],
         plt.tight_layout()
         plt.show()
     
-    # Create interactive slider
-    interact(
-        render_race_frame,
-        step=IntSlider(
-            min=0,
-            max=max_race_steps-1,
-            step=1,
-            value=0,
-            description='Race Step:'
+    # Create interactive slider with fallback for environments that don't support widgets
+    try:
+        widget = interact(
+            render_race_frame,
+            step=IntSlider(
+                min=0,
+                max=max_race_steps-1,
+                step=1,
+                value=0,
+                description='Race Step:'
+            )
         )
-    )
+        # Check if widget was created successfully
+        if widget is None:
+            raise RuntimeError("Widget not displayed")
+    except Exception as e:
+        print(f"⚠️ Interactive slider not available ({type(e).__name__}). Showing static frames instead.")
+        print("Tip: Run 'pip install jupyterlab-widgets' for JupyterLab or check README troubleshooting section.")
+        # Show first, middle, and last frames as fallback
+        for step in [0, max_race_steps // 2, max_race_steps - 1]:
+            print(f"\n--- Step {step} ---")
+            render_race_frame(step)
 
 
 def print_race_summary(race_results: List[Dict[str, Any]]) -> None:

@@ -124,7 +124,6 @@ cd src
 python3 evaluate_submission.py path/to/your/agent.py --wind_scenario training_1 --seeds 1 --num-seeds 100 --verbose
 ```
 
-
 ## Challenge Timeline
 
 The timeline for your challenge is available on the codabench page.
